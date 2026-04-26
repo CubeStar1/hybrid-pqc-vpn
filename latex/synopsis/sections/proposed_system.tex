@@ -1,0 +1,12 @@
+\section{Proposed System}
+The proposed system is a hybrid VPN tunnel with a Python-based backend and a Next.js graphical user interface. By combining classical and post-quantum key establishment in a single handshake, it ensures session keys remain secure against future cryptographic weaknesses.
+
+Key operations include:
+\begin{itemize}
+    \item \textbf{Key Exchange:} Parallel execution of X25519 (classical) and ML-KEM-768 (post-quantum).
+    \item \textbf{Key Derivation:} Both secrets are combined using HKDF-SHA256 for final session keys.
+    \item \textbf{Encryption:} Tunnel traffic is secured using hardware-accelerated AES-GCM.
+    \item \textbf{Authentication:} A hybrid signature model uses ECDSA-P256 and ML-DSA to avoid reliance on a single scheme.
+\end{itemize}
+
+The design also includes secure algorithm negotiation, packet-level integrity verification, and periodic rekeying. The system will be evaluated for secure file transfer and remote access against classical-only VPNs to demonstrate practical hybrid cryptography migration.
