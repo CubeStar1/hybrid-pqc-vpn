@@ -1,3 +1,5 @@
+"""Runtime configuration models."""
+
 from __future__ import annotations
 
 from enum import Enum
@@ -30,6 +32,9 @@ class AgentConfig(BaseModel):
     client_name: str = "rvce-lab-client"
     workspace_root: Path = Field(default_factory=lambda: Path(__file__).resolve().parents[2])
     tun_interface: str = "hyb0"
+    tun_address: str = "10.42.0.2"
+    tun_prefixlen: int = 24
+    udp_local_port: int = 4434
     default_profile: Profile = Field(
         default_factory=lambda: Profile(
             id="lab-gateway",
@@ -46,6 +51,9 @@ class GatewayConfig(BaseModel):
     listen_port: int = 9876
     udp_port: int = 4433
     server_name: str = "rvce-hybrid-gateway"
+    tun_interface: str = "hyb-gw0"
+    tun_address: str = "10.42.0.1"
+    tun_prefixlen: int = 24
     tunnel_pool: str = "10.42.0.0/24"
     pinned_server_key_id: str = "server-ecdsa-p256-dev"
     demo_username: str = "demo"

@@ -1,3 +1,5 @@
+"""Pydantic schemas for the control API."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -8,6 +10,9 @@ from pydantic import BaseModel, Field
 
 def utc_now() -> datetime:
     return datetime.now(tz=UTC)
+
+
+# ── Phase / status ───────────────────────────────────────────────────
 
 
 class PhaseStatus(BaseModel):
@@ -22,6 +27,9 @@ class ArchitectureCard(BaseModel):
     details: list[str]
 
 
+# ── Profiles ─────────────────────────────────────────────────────────
+
+
 class AgentProfileSummary(BaseModel):
     id: str
     name: str
@@ -30,6 +38,9 @@ class AgentProfileSummary(BaseModel):
     tunnel_cidr: str
     mtu: int
     supported_suite: str
+
+
+# ── Runtime ──────────────────────────────────────────────────────────
 
 
 class RuntimeContext(BaseModel):
@@ -41,6 +52,17 @@ class RuntimeContext(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
+class TunnelStatus(BaseModel):
+    active: bool = False
+    tun_device: str | None = None
+    local_address: str | None = None
+    remote_endpoint: str | None = None
+    packets_sent: int = 0
+    packets_recv: int = 0
+    bytes_sent: int = 0
+    bytes_recv: int = 0
+
+
 class SessionSummary(BaseModel):
     session_id: str
     state: Literal["idle", "connecting", "connected", "disconnected", "error"]
@@ -50,6 +72,7 @@ class SessionSummary(BaseModel):
     transcript_hash_hex: str | None = None
     pqc_enabled: bool = False
     connected_at: datetime = Field(default_factory=utc_now)
+    tunnel: TunnelStatus = Field(default_factory=TunnelStatus)
     notes: list[str] = Field(default_factory=list)
 
 
@@ -62,6 +85,9 @@ class RuntimeStatus(BaseModel):
     oqs_available: bool
     server_identity_ready: bool
     updated_at: datetime = Field(default_factory=utc_now)
+
+
+# ── Requests / responses ─────────────────────────────────────────────
 
 
 class ConnectRequest(BaseModel):
@@ -85,20 +111,24 @@ class ConnectResponse(BaseModel):
     session: SessionSummary | None = None
 
 
-class HandshakeDemoResponse(BaseModel):
+# ── Handshake protocol messages ──────────────────────────────────────
+
+
+class ClientHelloMessage(BaseModel):
     suite: str
-    oqs_available: bool
-    authentication_verified: bool
+    x25519_public_hex: str
+    mlkem_public_hex: str | None = None
+
+
+class ServerHelloMessage(BaseModel):
+    x25519_public_hex: str
+    mlkem_ciphertext_hex: str | None = None
+    ecdsa_signature_hex: str
+    ecdsa_public_key_der_hex: str
     transcript_hash_hex: str
-    transcript_bytes: int
-    client_key_hex: str | None = None
-    server_key_hex: str | None = None
-    client_nonce_base_hex: str | None = None
-    server_nonce_base_hex: str | None = None
-    ecdh_public_bytes: int
-    mlkem_public_bytes: int | None = None
-    mlkem_ciphertext_bytes: int | None = None
-    notes: list[str] = Field(default_factory=list)
+
+
+# ── Project snapshot ─────────────────────────────────────────────────
 
 
 class ProjectSnapshot(BaseModel):

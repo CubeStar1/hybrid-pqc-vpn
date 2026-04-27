@@ -8,6 +8,17 @@ export type PhaseStatus = {
   summary: string;
 };
 
+export type TunnelStatus = {
+  active: boolean;
+  tun_device?: string | null;
+  local_address?: string | null;
+  remote_endpoint?: string | null;
+  packets_sent: number;
+  packets_recv: number;
+  bytes_sent: number;
+  bytes_recv: number;
+};
+
 export type RuntimeStatus = {
   service: string;
   version: string;
@@ -30,6 +41,7 @@ export type RuntimeStatus = {
     suite: string;
     transcript_hash_hex?: string | null;
     pqc_enabled: boolean;
+    tunnel: TunnelStatus;
     notes: string[];
   } | null;
 };

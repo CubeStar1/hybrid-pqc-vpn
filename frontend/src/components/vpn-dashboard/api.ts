@@ -27,8 +27,22 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getElectronRuntime(): Promise<ElectronRuntimeContext> {
-  if (typeof window === "undefined") {
-    throw new Error("Electron runtime is only available in the client");
+  // In browser-only mode (no Electron), return a sensible fallback
+  if (typeof window === "undefined" || !window.electron?.runtime?.getContext) {
+    return {
+      platform: "web",
+      arch: "unknown",
+      nodeVersion: "N/A",
+      electronVersion: "N/A",
+      chromeVersion: "N/A",
+      linuxVmRecommended: true,
+      defaultAgentApi: "http://127.0.0.1:8765",
+      defaultGatewayApi: "http://127.0.0.1:9876",
+      notes: [
+        "Running in browser mode — Electron runtime is not available.",
+        "The dashboard will connect to the local agent API directly.",
+      ],
+    };
   }
 
   return window.electron.runtime.getContext();
