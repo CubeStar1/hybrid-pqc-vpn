@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/nodemon.json",
-  "exec": "electron .",
+  "exec": "electron --no-sandbox --ozone-platform=x11 --disable-gpu .",
   "watch": ["build"],
   "ignore": ["public/build", ".turbo"]
 }

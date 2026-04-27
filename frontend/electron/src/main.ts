@@ -1,9 +1,15 @@
+import { loadEnvConfig } from "@next/env";
 import { is } from "@electron-toolkit/utils";
 import { app, BrowserWindow, ipcMain } from "electron";
 import { readFileSync } from "fs";
 import { getPort } from "get-port-please";
 import { startServer } from "next/dist/server/lib/start-server";
 import { join } from "path";
+
+loadEnvConfig(process.cwd());
+
+const defaultAgentApi = process.env.NEXT_PUBLIC_HYBRID_VPN_AGENT_API_URL || "http://127.0.0.1:8765";
+const defaultGatewayApi = process.env.NEXT_PUBLIC_HYBRID_VPN_GATEWAY_API_URL || "http://127.0.0.1:9876";
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -78,8 +84,8 @@ app.whenReady().then(() => {
     electronVersion: process.versions.electron,
     chromeVersion: process.versions.chrome,
     linuxVmRecommended: true,
-    defaultAgentApi: "http://127.0.0.1:8765",
-    defaultGatewayApi: "http://127.0.0.1:9876",
+    defaultAgentApi,
+    defaultGatewayApi,
     notes: [
       "Primary target is a Linux VM where Electron and the Python tunnel agent run together.",
       "The desktop renderer stays unprivileged and should rely on the local agent API for VPN state.",

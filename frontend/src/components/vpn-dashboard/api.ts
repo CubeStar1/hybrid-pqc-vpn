@@ -9,6 +9,7 @@ import type {
   ProjectSnapshot,
   RuntimeStatus,
 } from "./types";
+import { getDefaultAgentApi, getDefaultGatewayApi } from "./env";
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -36,8 +37,8 @@ export async function getElectronRuntime(): Promise<ElectronRuntimeContext> {
       electronVersion: "N/A",
       chromeVersion: "N/A",
       linuxVmRecommended: true,
-      defaultAgentApi: "http://127.0.0.1:8765",
-      defaultGatewayApi: "http://127.0.0.1:9876",
+      defaultAgentApi: getDefaultAgentApi(),
+      defaultGatewayApi: getDefaultGatewayApi(),
       notes: [
         "Running in browser mode — Electron runtime is not available.",
         "The dashboard will connect to the local agent API directly.",

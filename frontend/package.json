@@ -19,7 +19,7 @@
     "electron:dev": "npm-run-all --parallel electron:build_watch electron:watch",
     "electron:dist:deb": "electron-builder --linux deb",
     "electron:dist": "electron-builder --dir",
-    "electron:watch": "cross-env NODE_ENV='development' nodemon",
+    "electron:watch": "cross-env NODE_ENV=development ELECTRON_RUN_AS_NODE= ELECTRON_NO_ATTACH_CONSOLE= GDK_BACKEND=x11 WAYLAND_DISPLAY= LIBGL_ALWAYS_SOFTWARE=1 nodemon",
     "format": "dprint fmt",
     "next:build": "next build --turbopack",
     "next:dev": "next dev --turbopack",

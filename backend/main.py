@@ -18,14 +18,14 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     agent_api = subparsers.add_parser("agent-api", help="Run the local agent control API")
-    agent_api.add_argument("--host", default="127.0.0.1")
-    agent_api.add_argument("--port", type=int, default=8765)
-    agent_api.add_argument("--gateway-url", default=None, help="Gateway API URL (e.g. http://10.0.2.15:9876)")
+    agent_api.add_argument("--host", default=None)
+    agent_api.add_argument("--port", type=int, default=None)
+    agent_api.add_argument("--gateway-url", default=None, help="Gateway API URL (e.g. http://127.0.0.1:9876)")
     agent_api.add_argument("--reload", action="store_true")
 
     gateway_api = subparsers.add_parser("gateway-api", help="Run the gateway control API")
-    gateway_api.add_argument("--host", default="0.0.0.0")
-    gateway_api.add_argument("--port", type=int, default=9876)
+    gateway_api.add_argument("--host", default=None)
+    gateway_api.add_argument("--port", type=int, default=None)
     gateway_api.add_argument("--reload", action="store_true")
 
     subparsers.add_parser("demo-handshake", help="Run the phase-1 hybrid handshake demo")
@@ -54,17 +54,29 @@ def main() -> None:
         return
 
     if args.command == "agent-api":
-        config = AgentConfig(control_host=args.host, control_port=args.port)
+        overrides = {}
+        if args.host is not None:
+            overrides["control_host"] = args.host
+        if args.port is not None:
+            overrides["control_port"] = args.port
+        if args.gateway_url is not None:
+            overrides["gateway_url"] = args.gateway_url
+        config = AgentConfig(**overrides)
         agent = AgentService(config)
-        app = create_agent_app(agent, gateway_url=args.gateway_url)
-        uvicorn.run(app, host=args.host, port=args.port, reload=args.reload)
+        app = create_agent_app(agent, gateway_url=config.gateway_url)
+        uvicorn.run(app, host=config.control_host, port=config.control_port, reload=args.reload)
         return
 
     if args.command == "gateway-api":
-        config = GatewayConfig(listen_host=args.host, listen_port=args.port)
+        overrides = {}
+        if args.host is not None:
+            overrides["listen_host"] = args.host
+        if args.port is not None:
+            overrides["listen_port"] = args.port
+        config = GatewayConfig(**overrides)
         gateway = GatewayService(config)
         app = create_gateway_app(gateway)
-        uvicorn.run(app, host=args.host, port=args.port, reload=args.reload)
+        uvicorn.run(app, host=config.listen_host, port=config.listen_port, reload=args.reload)
         return
 
     parser.error(f"Unsupported command: {args.command}")

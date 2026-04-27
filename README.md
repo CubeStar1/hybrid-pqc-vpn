@@ -64,25 +64,32 @@ npm install -g pnpm
 cd /tmp
 git clone --depth 1 https://github.com/open-quantum-safe/liboqs.git
 cd liboqs && mkdir build && cd build
-cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local ..
+cmake -GNinja -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local ..
 ninja && sudo ninja install
 sudo ldconfig
+
+# Verify the shared library exists for liboqs-python
+ls /usr/local/lib/liboqs.so*
 ```
 
 ### 3. Set up and run the backend
 
 ```bash
-cd backend
-uv sync --all-extras
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 
 # Verify crypto works
+cd backend
+uv sync --all-extras
 uv run python main.py demo-handshake
 
-# Run the agent API (client VM)
-uv run python main.py agent-api --host 127.0.0.1 --port 8765 --gateway-url http://<GATEWAY_IP>:9876
+# Same-machine testing: backend/.env defaults to localhost
 
-# Run the gateway API (gateway VM, separate terminal/VM)
-uv run python main.py gateway-api --host 0.0.0.0 --port 9876
+# Run the gateway API
+uv run python main.py gateway-api
+
+# Run the agent API
+uv run python main.py agent-api
 ```
 
 ### 4. Set up and run the frontend
@@ -90,6 +97,7 @@ uv run python main.py gateway-api --host 0.0.0.0 --port 9876
 ```bash
 cd frontend
 pnpm install
+cp .env.example .env
 
 # Browser-only dev (no Electron)
 pnpm next:dev
@@ -139,20 +147,43 @@ curl -X POST http://127.0.0.1:8765/disconnect \
 | VM 2 | Gateway | 192.168.x.20 | Gateway API :9876, UDP :4433 |
 
 Use bridged networking for VM-to-VM communication, or NAT with port forwarding.
+For VM-based testing, update `backend/.env` so `HYBRID_VPN_AGENT_GATEWAY_URL` and
+`HYBRID_VPN_AGENT_GATEWAY_HOST` point at the gateway VM.
+Update `frontend/.env` so `NEXT_PUBLIC_HYBRID_VPN_AGENT_API_URL` points at the agent VM and
+`NEXT_PUBLIC_HYBRID_VPN_GATEWAY_API_URL` points at the gateway VM.
 
 ### Running the full tunnel (requires root)
 
 ```bash
 # On Gateway VM
-sudo uv run python main.py gateway-api --host 0.0.0.0 --port 9876
+sudo uv run python main.py gateway-api
 
 # On Client VM
-sudo uv run python main.py agent-api --host 127.0.0.1 --port 8765 \
-  --gateway-url http://192.168.x.20:9876
+HYBRID_VPN_AGENT_GATEWAY_URL=http://192.168.x.20:9876 \
+HYBRID_VPN_AGENT_GATEWAY_HOST=192.168.x.20 \
+sudo uv run python main.py agent-api
 ```
 
 Root/sudo is needed for TUN device creation. After connecting through the dashboard,
 the agent creates `hyb0` (10.42.0.2/24) and the gateway creates `hyb-gw0` (10.42.0.1/24).
+
+### Localhost backend testing
+
+To run both services on the same Linux machine in separate terminals:
+
+```bash
+cd backend
+cp .env.example .env
+
+# terminal 1
+uv run python main.py gateway-api
+
+# terminal 2
+uv run python main.py agent-api
+```
+
+That supports health, status, auth, and handshake immediately. Full TUN tunnel testing on
+one machine still requires `sudo` because the agent creates `hyb0`.
 
 ## Development (Windows/macOS)
 

@@ -14,17 +14,23 @@ Control plane and tunnel engine for the Linux VM-based hybrid VPN:
 # Install dependencies
 uv sync --all-extras
 
+# Optional: create a local config file for same-machine testing
+cp .env.example .env
+
 # Print default config
 uv run python main.py print-config
 
 # Run the handshake demo
 uv run python main.py demo-handshake
 
-# Start the agent API (client side)
-uv run python main.py agent-api --host 127.0.0.1 --port 8765 --gateway-url http://<GATEWAY_IP>:9876
-
 # Start the gateway API (server side)
-uv run python main.py gateway-api --host 0.0.0.0 --port 9876
+uv run python main.py gateway-api
+
+# Start the agent API (client side)
+uv run python main.py agent-api
+
+# Or override any setting explicitly at runtime
+HYBRID_VPN_AGENT_GATEWAY_URL=http://192.168.x.20:9876 uv run python main.py agent-api
 
 # Run tests
 uv run pytest tests/ -v
@@ -35,4 +41,7 @@ uv run pytest tests/ -v
 - `liboqs-python` is required for real `ML-KEM-768` runs — needs `liboqs` C library installed on the system.
 - Without a working `oqs` install, the control API still loads but reports PQC as unavailable.
 - TUN/route management requires Linux with root privileges. On other platforms the tunnel is gracefully skipped.
-- Use `--gateway-url` on the agent to enable real client-server handshake with the gateway.
+- `backend/.env` is loaded automatically with `HYBRID_VPN_AGENT_*` and `HYBRID_VPN_GATEWAY_*` variables.
+- For localhost testing, set both `HYBRID_VPN_AGENT_GATEWAY_URL` and `HYBRID_VPN_AGENT_GATEWAY_HOST` to `127.0.0.1`.
+- `backend/.env.example` keeps localhost active and includes a commented two-VM template.
+- CLI flags still override `.env` values when you need a one-off change.

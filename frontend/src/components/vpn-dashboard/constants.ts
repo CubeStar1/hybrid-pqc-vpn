@@ -1,4 +1,6 @@
-export const DEFAULT_AGENT_API = "http://127.0.0.1:8765";
+import { getDefaultAgentApi } from "./env";
+
+export const DEFAULT_AGENT_API = getDefaultAgentApi();
 
 export const DEMO_CREDENTIALS = {
   username: "demo",

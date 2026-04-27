@@ -104,7 +104,7 @@ class AgentService:
             platform=platform.system().lower(),
             linux_vm_target=self.config.linux_vm_target,
             tun_interface=self.config.tun_interface,
-            control_api=self.config.api_base_url,
+            control_api=self.config.resolved_api_base_url,
             notes=[
                 "Primary runtime target is a Linux VM for both Electron and the Python tunnel agent.",
                 f"TUN interface: {self.config.tun_interface} ({self.config.tun_address}/{self.config.tun_prefixlen})",
