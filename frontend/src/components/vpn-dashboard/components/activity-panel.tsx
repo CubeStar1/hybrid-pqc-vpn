@@ -9,6 +9,9 @@ type SessionInfo = {
   username: string;
   suite: string;
   state: string;
+  tunnelActive: boolean;
+  remoteEndpoint?: string | null;
+  localAddress?: string | null;
   transcriptHash?: string | null;
   pqcEnabled: boolean;
   notes: string[];
@@ -42,16 +45,21 @@ export function ActivityPanel({ session, runtime }: ActivityPanelProps): React.J
         <TabsContent value="session" className="mt-4 space-y-4">
           {session ? (
             <>
-              <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 px-4 py-3">
-                <div>
+              <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                    Active tunnel
+                    Tunnel status
                   </p>
                   <p className="mt-1 text-lg font-semibold capitalize text-foreground">
-                    {session.state}
+                    {session.tunnelActive ? "Active" : "Handshake complete"}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {session.tunnelActive
+                      ? session.remoteEndpoint || "Encrypted UDP tunnel is up."
+                      : "The control-plane session worked, but the TUN interface was not created."}
                   </p>
                 </div>
-                <Badge variant="outline" className="rounded-full">
+                <Badge variant="outline" className="max-w-full self-start rounded-full break-all whitespace-normal sm:self-auto">
                   {session.suite}
                 </Badge>
               </div>
@@ -64,6 +72,16 @@ export function ActivityPanel({ session, runtime }: ActivityPanelProps): React.J
                   icon={ShieldAlert}
                   label="Transcript"
                   value={session.transcriptHash?.slice(0, 16) ?? "Pending"}
+                />
+                <DetailRow
+                  icon={Network}
+                  label="Tunnel endpoint"
+                  value={session.remoteEndpoint ?? (session.tunnelActive ? "Active" : "Unavailable")}
+                />
+                <DetailRow
+                  icon={LaptopMinimal}
+                  label="Local address"
+                  value={session.localAddress ?? (session.tunnelActive ? "Assigned" : "Unavailable")}
                 />
               </dl>
 
@@ -122,12 +140,14 @@ function DetailRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 bg-background px-4 py-3">
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+    <div className="flex min-w-0 items-start justify-between gap-3 bg-background px-4 py-3">
+      <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
         <Icon className="size-3.5 text-primary shrink-0" />
         {label}
       </div>
-      <p className="break-all text-sm font-medium text-foreground text-right">{value}</p>
+      <p className="min-w-0 break-words text-right text-sm font-medium leading-snug text-foreground">
+        {value}
+      </p>
     </div>
   );
 }

@@ -74,6 +74,7 @@ export function VpnDashboard(): React.JSX.Element {
         <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
           <ConnectionPanel
             isConnected={isConnected}
+            isTunnelActive={Boolean(status?.current_session?.tunnel.active)}
             sessionState={sessionState}
             profileName={currentProfile?.name ?? "No profile selected"}
             connectMessage={connectMessage}
@@ -129,6 +130,9 @@ export function VpnDashboard(): React.JSX.Element {
                   username: status.current_session.username,
                   suite: status.current_session.suite,
                   state: status.current_session.state,
+                  tunnelActive: status.current_session.tunnel.active,
+                  remoteEndpoint: status.current_session.tunnel.remote_endpoint,
+                  localAddress: status.current_session.tunnel.local_address,
                   transcriptHash: status.current_session.transcript_hash_hex,
                   pqcEnabled: status.current_session.pqc_enabled,
                   notes: status.current_session.notes,

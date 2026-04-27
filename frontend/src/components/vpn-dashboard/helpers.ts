@@ -9,5 +9,5 @@ export function getProfileDescription(profile?: Profile) {
     return "The local agent will publish available profiles here.";
   }
 
-  return `${profile.gateway_host}:${profile.gateway_port} | ${profile.tunnel_cidr} | MTU ${profile.mtu}`;
+  return `Gateway ${profile.gateway_host}:${profile.gateway_port}, tunnel range ${profile.tunnel_cidr}, MTU ${profile.mtu}.`;
 }

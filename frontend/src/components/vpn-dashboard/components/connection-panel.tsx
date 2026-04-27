@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 
 type ConnectionPanelProps = {
   isConnected: boolean;
+  isTunnelActive: boolean;
   sessionState: string;
   profileName: string;
   connectMessage: string;
@@ -18,6 +19,7 @@ type ConnectionPanelProps = {
 
 export function ConnectionPanel({
   isConnected,
+  isTunnelActive,
   sessionState,
   profileName,
   connectMessage,
@@ -29,6 +31,14 @@ export function ConnectionPanel({
   onDisconnect,
   onRefresh,
 }: ConnectionPanelProps): React.JSX.Element {
+  const statusTitle = isConnected
+    ? (isTunnelActive ? "Tunnel active" : "Session ready")
+    : sessionState;
+
+  const statusTone = isConnected
+    ? (isTunnelActive ? "bg-emerald-500 text-white" : "bg-amber-500 text-black")
+    : "bg-muted text-muted-foreground";
+
   return (
     <section className="space-y-5">
       <h2 className="text-lg font-semibold text-foreground">Connection</h2>
@@ -38,11 +48,7 @@ export function ConnectionPanel({
         {/* Status display */}
         <div className="flex items-center gap-4">
           <div
-            className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors ${
-              isConnected
-                ? "bg-emerald-500 text-white"
-                : "bg-muted text-muted-foreground"
-            }`}
+            className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors ${statusTone}`}
           >
             {isConnected ? (
               <ShieldCheck className="size-5" />
@@ -52,14 +58,16 @@ export function ConnectionPanel({
           </div>
           <div className="min-w-0">
             <p className="text-2xl font-semibold capitalize text-foreground leading-tight">
-              {sessionState}
+              {statusTitle}
             </p>
-            <p className="text-sm text-muted-foreground truncate">{profileName}</p>
+            <p className="text-sm text-muted-foreground">
+              {isConnected && !isTunnelActive ? `${profileName} • needs TUN permissions` : profileName}
+            </p>
           </div>
         </div>
 
         {/* Actions — single row, left-aligned, uniform sizing */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <Button
             className="rounded-full px-5"
             onClick={onConnect}
@@ -80,7 +88,7 @@ export function ConnectionPanel({
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full ml-auto"
+            className="rounded-full md:ml-auto"
             onClick={onRefresh}
             disabled={isRefreshing}
           >

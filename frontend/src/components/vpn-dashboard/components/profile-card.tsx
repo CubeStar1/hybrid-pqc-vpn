@@ -71,7 +71,9 @@ export function ProfileCard({
                 ))}
               </SelectContent>
             </Select>
-            <FieldDescription>{profileDescription}</FieldDescription>
+            <FieldDescription className="break-words">
+              A profile is a saved gateway/tunnel target. {profileDescription}
+            </FieldDescription>
           </FieldContent>
         </Field>
       </FieldGroup>
@@ -87,7 +89,7 @@ export function ProfileCard({
       </Button>
 
       {/* Server details — flat definition list, no individual cards */}
-      <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-3">
+      <div className="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-4">
         <div className="flex items-center gap-2 text-sm font-medium text-foreground">
           <Globe className="size-4 text-primary" />
           Server details
@@ -105,9 +107,11 @@ export function ProfileCard({
 
 function DefItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-2 border-b border-border/40 pb-2 last:border-0">
+    <div className="grid min-w-0 grid-cols-[minmax(0,92px)_minmax(0,1fr)] items-start gap-3 border-b border-border/40 pb-2 last:border-0">
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium text-foreground text-right">{value}</dd>
+      <dd className="min-w-0 break-words text-right text-sm font-medium leading-snug text-foreground">
+        {value}
+      </dd>
     </div>
   );
 }
