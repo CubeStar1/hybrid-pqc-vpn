@@ -1,7 +1,6 @@
 import { Loader2, PlugZap, RefreshCw, ShieldCheck, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type ConnectionPanelProps = {
   isConnected: boolean;
@@ -31,73 +30,81 @@ export function ConnectionPanel({
   onRefresh,
 }: ConnectionPanelProps): React.JSX.Element {
   return (
-    <Card className="border-border/70 bg-card/90 shadow-lg shadow-black/5">
-      <CardHeader className="border-b border-border/60">
-        <CardTitle className="text-xl">Connection</CardTitle>
-        <CardDescription>
-          One place to connect, disconnect, and check whether the tunnel is healthy.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6 pt-6">
-        <div className="rounded-[2rem] border border-border/70 bg-gradient-to-br from-primary/12 via-background to-background p-6">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Current state</p>
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex size-12 items-center justify-center rounded-full ${
-                    isConnected ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {isConnected ? <ShieldCheck className="size-5" /> : <ShieldOff className="size-5" />}
-                </div>
-                <div>
-                  <p className="text-3xl font-semibold capitalize text-foreground">{sessionState}</p>
-                  <p className="text-sm text-muted-foreground">{profileName}</p>
-                </div>
-              </div>
-            </div>
+    <section className="space-y-5">
+      <h2 className="text-lg font-semibold text-foreground">Connection</h2>
 
-            <div className="flex flex-wrap gap-3">
-              <Button size="lg" className="rounded-full px-6" onClick={onConnect} disabled={!canConnect || isBusy}>
-                {isBusy ? <Loader2 className="animate-spin" /> : <PlugZap />}
-                {isConnected ? "Reconnect" : "Connect"}
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full px-6"
-                onClick={onDisconnect}
-                disabled={!isConnected || isBusy}
-              >
-                <ShieldOff />
-                Disconnect
-              </Button>
-              <Button
-                size="lg"
-                variant="ghost"
-                className="rounded-full px-5"
-                onClick={onRefresh}
-                disabled={isRefreshing}
-              >
-                <RefreshCw className={isRefreshing ? "animate-spin" : ""} />
-                Refresh
-              </Button>
-            </div>
+      {/* Primary workspace — state is the dominant idea, actions below */}
+      <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/8 via-transparent to-transparent p-5 space-y-5">
+        {/* Status display */}
+        <div className="flex items-center gap-4">
+          <div
+            className={`flex size-11 shrink-0 items-center justify-center rounded-full transition-colors ${
+              isConnected
+                ? "bg-emerald-500 text-white"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {isConnected ? (
+              <ShieldCheck className="size-5" />
+            ) : (
+              <ShieldOff className="size-5" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-2xl font-semibold capitalize text-foreground leading-tight">
+              {sessionState}
+            </p>
+            <p className="text-sm text-muted-foreground truncate">{profileName}</p>
           </div>
         </div>
 
-        <div className="grid gap-3 rounded-3xl border border-border/60 bg-muted/30 p-4 sm:grid-cols-2">
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Agent response</p>
-            <p className="mt-2 text-sm leading-6 text-foreground">{connectMessage}</p>
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Handshake</p>
-            <p className="mt-2 text-sm leading-6 text-foreground">{lastHandshake}</p>
-          </div>
+        {/* Actions — single row, left-aligned, uniform sizing */}
+        <div className="flex items-center gap-2.5">
+          <Button
+            className="rounded-full px-5"
+            onClick={onConnect}
+            disabled={!canConnect || isBusy}
+          >
+            {isBusy ? <Loader2 className="size-4 animate-spin" /> : <PlugZap className="size-4" />}
+            {isConnected ? "Reconnect" : "Connect"}
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-full px-5"
+            onClick={onDisconnect}
+            disabled={!isConnected || isBusy}
+          >
+            <ShieldOff className="size-4" />
+            Disconnect
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full ml-auto"
+            onClick={onRefresh}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <span className="sr-only">Refresh</span>
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Status rows */}
+      <div className="grid gap-px overflow-hidden rounded-xl border border-border/60 bg-border/40 sm:grid-cols-2">
+        <div className="bg-background px-4 py-3">
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            Agent response
+          </p>
+          <p className="mt-1.5 text-sm text-foreground">{connectMessage}</p>
+        </div>
+        <div className="bg-background px-4 py-3">
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            Handshake
+          </p>
+          <p className="mt-1.5 text-sm text-foreground">{lastHandshake}</p>
+        </div>
+      </div>
+    </section>
   );
 }

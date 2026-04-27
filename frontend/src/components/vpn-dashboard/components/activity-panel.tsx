@@ -1,7 +1,6 @@
 import { Cpu, LaptopMinimal, Network, Server, ShieldAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -31,77 +30,85 @@ type ActivityPanelProps = {
 
 export function ActivityPanel({ session, runtime }: ActivityPanelProps): React.JSX.Element {
   return (
-    <Card className="border-border/70 bg-card/90 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-xl">Details</CardTitle>
-        <CardDescription>Keep advanced session and runtime information available without crowding the main screen.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="session">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="session">Session</TabsTrigger>
-            <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
-          </TabsList>
+    <section className="space-y-4">
+      <h2 className="text-lg font-semibold text-foreground">Details</h2>
 
-          <TabsContent value="session" className="mt-4 space-y-4">
-            {session ? (
-              <>
-                <div className="flex items-center justify-between rounded-3xl border border-border/60 bg-muted/25 p-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Active tunnel</p>
-                    <p className="mt-2 text-lg font-semibold capitalize text-foreground">{session.state}</p>
-                  </div>
-                  <Badge variant="outline" className="rounded-full">
-                    {session.suite}
-                  </Badge>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <DetailRow icon={Network} label="Profile" value={session.profileId} />
-                  <DetailRow icon={LaptopMinimal} label="Username" value={session.username} />
-                  <DetailRow icon={Cpu} label="PQC" value={session.pqcEnabled ? "Enabled" : "Disabled"} />
-                  <DetailRow
-                    icon={ShieldAlert}
-                    label="Transcript"
-                    value={session.transcriptHash?.slice(0, 16) ?? "Pending"}
-                  />
-                </div>
-                {session.notes.length ? (
-                  <div className="space-y-2 rounded-3xl border border-border/60 bg-background/80 p-4">
-                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Notes</p>
-                    {session.notes.map((note) => (
-                      <p key={note} className="text-sm leading-6 text-foreground">
-                        {note}
-                      </p>
-                    ))}
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <EmptyState text="No active session yet. Connect to a profile to see tunnel details here." />
-            )}
-          </TabsContent>
+      <Tabs defaultValue="session">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="session">Session</TabsTrigger>
+          <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="diagnostics" className="mt-4 space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <DetailRow icon={Server} label="Agent API" value={runtime?.defaultAgentApi ?? "Unavailable"} />
-              <DetailRow icon={Network} label="Gateway API" value={runtime?.defaultGatewayApi ?? "Unavailable"} />
-              <DetailRow icon={LaptopMinimal} label="Electron" value={runtime?.electronVersion ?? "Browser preview"} />
-              <DetailRow icon={Cpu} label="Node" value={runtime?.nodeVersion ?? "Unavailable"} />
-            </div>
-            <Separator />
-            <div className="space-y-2 rounded-3xl border border-border/60 bg-background/80 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Platform</p>
-              <p className="text-sm font-medium text-foreground">{runtime?.platform ?? "web"}</p>
-              {(runtime?.notes ?? ["Runtime notes are not available yet."]).map((note) => (
-                <p key={note} className="text-sm leading-6 text-muted-foreground">
-                  {note}
-                </p>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+        <TabsContent value="session" className="mt-4 space-y-4">
+          {session ? (
+            <>
+              <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/20 px-4 py-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                    Active tunnel
+                  </p>
+                  <p className="mt-1 text-lg font-semibold capitalize text-foreground">
+                    {session.state}
+                  </p>
+                </div>
+                <Badge variant="outline" className="rounded-full">
+                  {session.suite}
+                </Badge>
+              </div>
+
+              <dl className="grid gap-x-6 gap-y-0 rounded-xl border border-border/60 overflow-hidden bg-border/40 sm:grid-cols-2">
+                <DetailRow icon={Network} label="Profile" value={session.profileId} />
+                <DetailRow icon={LaptopMinimal} label="Username" value={session.username} />
+                <DetailRow icon={Cpu} label="PQC" value={session.pqcEnabled ? "Enabled" : "Disabled"} />
+                <DetailRow
+                  icon={ShieldAlert}
+                  label="Transcript"
+                  value={session.transcriptHash?.slice(0, 16) ?? "Pending"}
+                />
+              </dl>
+
+              {session.notes.length > 0 && (
+                <div className="space-y-1.5 rounded-xl border border-border/60 bg-background px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                    Notes
+                  </p>
+                  {session.notes.map((note) => (
+                    <p key={note} className="text-sm text-foreground">
+                      {note}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyState text="No active session. Connect to see tunnel details." />
+          )}
+        </TabsContent>
+
+        <TabsContent value="diagnostics" className="mt-4 space-y-4">
+          <dl className="grid gap-px rounded-xl border border-border/60 overflow-hidden bg-border/40 sm:grid-cols-2">
+            <DetailRow icon={Server} label="Agent API" value={runtime?.defaultAgentApi ?? "—"} />
+            <DetailRow icon={Network} label="Gateway API" value={runtime?.defaultGatewayApi ?? "—"} />
+            <DetailRow icon={LaptopMinimal} label="Electron" value={runtime?.electronVersion ?? "Browser"} />
+            <DetailRow icon={Cpu} label="Node" value={runtime?.nodeVersion ?? "—"} />
+          </dl>
+          <Separator />
+          <div className="space-y-1.5 rounded-xl border border-border/60 bg-background px-4 py-3">
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+              Platform
+            </p>
+            <p className="text-sm font-medium text-foreground">
+              {runtime?.platform ?? "web"}
+            </p>
+            {(runtime?.notes ?? []).map((note) => (
+              <p key={note} className="text-sm text-muted-foreground">
+                {note}
+              </p>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </section>
   );
 }
 
@@ -115,19 +122,19 @@ function DetailRow({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-background/80 px-4 py-3">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-        <Icon className="size-3.5 text-primary" />
+    <div className="flex items-center justify-between gap-3 bg-background px-4 py-3">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Icon className="size-3.5 text-primary shrink-0" />
         {label}
       </div>
-      <p className="mt-2 break-all text-sm font-medium text-foreground">{value}</p>
+      <p className="break-all text-sm font-medium text-foreground text-right">{value}</p>
     </div>
   );
 }
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="rounded-3xl border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-sm text-muted-foreground">
+    <div className="rounded-xl border border-dashed border-border/60 bg-muted/10 px-4 py-8 text-center text-sm text-muted-foreground">
       {text}
     </div>
   );

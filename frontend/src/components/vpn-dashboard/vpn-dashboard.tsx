@@ -57,14 +57,15 @@ export function VpnDashboard(): React.JSX.Element {
   const sessionState = status?.current_session?.state ?? (dashboardQuery.isFetching ? "checking" : "disconnected");
   const isBusy = connectMutation.isPending || disconnectMutation.isPending;
   const profileOptions = profiles.length ? profiles : [{ id: "lab-gateway", name: "RVCE Lab Gateway" }];
+  const isOnline = Boolean(status);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_34%),linear-gradient(to_bottom,var(--background),color-mix(in_oklab,var(--background)_88%,var(--primary)_12%))]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <DashboardHeader />
+    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.08),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.12),transparent_50%)]">
+      <div className="animate-fade-in mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
+        <DashboardHeader isOnline={isOnline} />
 
         <NetworkOverview
-          isOnline={Boolean(status)}
+          isOnline={isOnline}
           oqsAvailable={Boolean(status?.oqs_available)}
           identityReady={Boolean(status?.server_identity_ready)}
           transcriptBytes={handshake?.transcript_bytes}
@@ -78,10 +79,10 @@ export function VpnDashboard(): React.JSX.Element {
             connectMessage={connectMessage}
             lastHandshake={
               handshake
-                ? `${handshake.authentication_verified ? "Verified" : "Pending"} authentication, ${
+                ? `${handshake.authentication_verified ? "Verified" : "Pending"} · ${
                     handshake.oqs_available ? "PQC ready" : "PQC unavailable"
                   }`
-                : "Handshake information is not available yet."
+                : "Awaiting handshake data."
             }
             canConnect={Boolean(selectedProfileId)}
             isBusy={isBusy}

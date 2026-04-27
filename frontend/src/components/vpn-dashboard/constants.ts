@@ -12,7 +12,7 @@ export const STATUS_LABEL = {
 } as const;
 
 export const PHASE_TONE = {
-  complete: "border-emerald-400/30 bg-emerald-400/10 text-emerald-100",
-  in_progress: "border-amber-300/30 bg-amber-300/10 text-amber-100",
-  planned: "border-white/12 bg-white/6 text-slate-100",
+  complete: "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+  in_progress: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  planned: "border-border bg-muted/40 text-muted-foreground",
 } as const;
