@@ -41,6 +41,9 @@ uv run pytest tests/ -v
 - `liboqs-python` is required for real `ML-KEM-768` runs — needs `liboqs` C library installed on the system.
 - Without a working `oqs` install, the control API still loads but reports PQC as unavailable.
 - TUN/route management requires Linux with root privileges. On other platforms the tunnel is gracefully skipped.
+- If `sudo uv ...` fails with `sudo: uv: command not found`, `uv` is likely installed in `~/.local/bin`.
+  Use `sudo /home/<your-user>/.local/bin/uv ...`, `sudo env "PATH=$PATH" uv ...`, or
+  `sudo ./.venv/bin/python main.py ...` from `backend/`.
 - `backend/.env` is loaded automatically with `HYBRID_VPN_AGENT_*` and `HYBRID_VPN_GATEWAY_*` variables.
 - For localhost testing, set both `HYBRID_VPN_AGENT_GATEWAY_URL` and `HYBRID_VPN_AGENT_GATEWAY_HOST` to `127.0.0.1`.
 - `backend/.env.example` keeps localhost active and includes a commented two-VM template.

@@ -154,6 +154,11 @@ Update `frontend/.env` so `NEXT_PUBLIC_HYBRID_VPN_AGENT_API_URL` points at the a
 
 ### Running the full tunnel (requires root)
 
+If `sudo uv ...` fails with `sudo: uv: command not found`, your `uv` binary is probably installed in
+`~/.local/bin`, which `sudo` does not include by default. Use either
+`sudo /home/<your-user>/.local/bin/uv ...`, `sudo env "PATH=$PATH" uv ...`, or `sudo ./.venv/bin/python ...`
+from the `backend/` directory instead.
+
 ```bash
 # On Gateway VM
 sudo uv run python main.py gateway-api
@@ -170,6 +175,10 @@ the agent creates `hyb0` (10.42.0.2/24) and the gateway creates `hyb-gw0` (10.42
 ### Localhost backend testing
 
 To run both services on the same Linux machine in separate terminals:
+
+If you later switch these to `sudo` for real TUN creation and `sudo uv ...` fails with
+`sudo: uv: command not found`, use `sudo /home/<your-user>/.local/bin/uv ...`,
+`sudo env "PATH=$PATH" uv ...`, or `sudo ./.venv/bin/python ...` from `backend/`.
 
 ```bash
 cd backend
