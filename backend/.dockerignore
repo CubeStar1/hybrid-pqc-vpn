@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+*.whl
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Environment
+.env
+.env.*
+
+# Tests
+tests/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+docker-compose*.yml
+
+# Local artifacts
+app/tmp/
+.DS_Store
+Thumbs.db
+
+# Docs not needed in the runtime image
+LICENSE
+
+# Tooling
+.claude/
