@@ -1,0 +1,10 @@
+\section{Introduction}
+\justifying
+Virtual Private Networks protect data over untrusted networks, but most
+deployed VPN handshakes still rely on classical public-key cryptography that
+can be broken by future large-scale quantum computers. This project proposes a
+compact hybrid VPN prototype for secure remote access, where session keys are
+derived from both X25519 elliptic-curve Diffie--Hellman and the post-quantum
+ML-KEM-768 key encapsulation mechanism. The objective is to demonstrate a
+practical migration path that preserves present-day performance while reducing
+the ``harvest now, decrypt later'' risk for long-lived confidential traffic.
