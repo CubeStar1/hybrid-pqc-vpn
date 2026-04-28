@@ -92,6 +92,45 @@ uv run python main.py gateway-api
 uv run python main.py agent-api
 ```
 
+### 3a. Build and run the backend with Docker
+
+```bash
+cd backend
+docker build -t hybrid-vpn-backend .
+
+# Agent API
+docker run --rm --env-file .env -p 8765:8765 hybrid-vpn-backend
+
+# Gateway API
+docker run --rm --env-file .env -p 9876:9876 hybrid-vpn-backend \
+  python main.py gateway-api --host 0.0.0.0
+```
+
+For Linux hosts, full TUN testing also needs extra privileges and UDP port mappings:
+
+```bash
+# Agent API with TUN access
+docker run --rm \
+  --env-file .env \
+  --cap-add=NET_ADMIN \
+  --device /dev/net/tun \
+  -p 8765:8765 \
+  -p 4434:4434/udp \
+  hybrid-vpn-backend
+
+# Gateway API with TUN access
+docker run --rm \
+  --env-file .env \
+  --cap-add=NET_ADMIN \
+  --device /dev/net/tun \
+  -p 9876:9876 \
+  -p 4433:4433/udp \
+  hybrid-vpn-backend python main.py gateway-api --host 0.0.0.0
+```
+
+Docker on Windows/macOS can run the APIs, but the Linux TUN interfaces still require a Linux environment
+such as WSL2 or a Linux VM.
+
 ### 4. Set up and run the frontend
 
 ```bash
