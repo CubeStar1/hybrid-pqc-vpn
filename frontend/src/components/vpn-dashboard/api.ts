@@ -6,7 +6,6 @@ import type {
   HandshakeDemo,
   MessageResponse,
   Profile,
-  ProjectSnapshot,
   RuntimeStatus,
 } from "./types";
 import { getDefaultAgentApi, getDefaultGatewayApi } from "./env";
@@ -39,10 +38,6 @@ export async function getElectronRuntime(): Promise<ElectronRuntimeContext> {
       linuxVmRecommended: true,
       defaultAgentApi: getDefaultAgentApi(),
       defaultGatewayApi: getDefaultGatewayApi(),
-      notes: [
-        "Running in browser mode — Electron runtime is not available.",
-        "The dashboard will connect to the local agent API directly.",
-      ],
     };
   }
 
@@ -50,16 +45,14 @@ export async function getElectronRuntime(): Promise<ElectronRuntimeContext> {
 }
 
 export async function getDashboardSnapshot(apiBase: string): Promise<DashboardSnapshot> {
-  const [status, snapshot, profiles, handshake] = await Promise.all([
+  const [status, profiles, handshake] = await Promise.all([
     fetchJson<RuntimeStatus>(`${apiBase}/status`),
-    fetchJson<ProjectSnapshot>(`${apiBase}/snapshot`),
     fetchJson<Profile[]>(`${apiBase}/profiles`),
     fetchJson<HandshakeDemo>(`${apiBase}/demo/handshake`, { method: "POST" }),
   ]);
 
   return {
     status,
-    snapshot,
     profiles,
     handshake,
   };

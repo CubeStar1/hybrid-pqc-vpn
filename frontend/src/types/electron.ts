@@ -7,5 +7,5 @@ export type ElectronRuntimeContext = {
   linuxVmRecommended: boolean;
   defaultAgentApi: string;
   defaultGatewayApi: string;
-  notes: string[];
 };
+

@@ -8,7 +8,7 @@ from argon2 import PasswordHasher
 
 from .config import GatewayConfig
 from .crypto.hybrid import HandshakeServer, TrafficSecrets
-from .schemas import ArchitectureCard, ClientHelloMessage, ServerHelloMessage
+from .schemas import ClientHelloMessage, ServerHelloMessage
 from .tunnel import IS_LINUX, TunnelManager
 
 logger = logging.getLogger(__name__)
@@ -97,25 +97,3 @@ class GatewayService:
             return self._tunnel.stats
         return {"packets_sent": 0, "packets_recv": 0, "bytes_sent": 0, "bytes_recv": 0}
 
-    # ── Architecture info ────────────────────────────────────────────
-
-    def architecture_cards(self) -> list[ArchitectureCard]:
-        return [
-            ArchitectureCard(
-                title="Gateway Control Plane",
-                description="Owns auth, session policy, and tunnel lifecycle.",
-                details=[
-                    "Pinned ECDSA-P256 server identity for MVP authentication.",
-                    "ML-DSA-65 is planned after the tunnel and client control flow are stable.",
-                    "Exposes a clear split between control-plane auth and UDP data-plane handling.",
-                ],
-            ),
-            ArchitectureCard(
-                title="Linux VM Runtime",
-                description="Targets a clean Linux network stack instead of host-specific workarounds.",
-                details=[
-                    "Systemd-ready deployment path for demos inside VMware, VirtualBox, or Hyper-V guests.",
-                    "TUN and route orchestration remain intentionally isolated to Linux.",
-                ],
-            ),
-        ]

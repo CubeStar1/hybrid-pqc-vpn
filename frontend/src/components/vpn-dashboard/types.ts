@@ -2,12 +2,6 @@ import type { ElectronRuntimeContext } from "@/types/electron";
 
 export type { ElectronRuntimeContext };
 
-export type PhaseStatus = {
-  name: string;
-  status: "complete" | "in_progress" | "planned";
-  summary: string;
-};
-
 export type TunnelStatus = {
   active: boolean;
   tun_device?: string | null;
@@ -30,9 +24,7 @@ export type RuntimeStatus = {
     linux_vm_target: boolean;
     tun_interface?: string | null;
     control_api?: string | null;
-    notes: string[];
   };
-  phases: PhaseStatus[];
   current_session?: {
     session_id: string;
     state: string;
@@ -42,19 +34,7 @@ export type RuntimeStatus = {
     transcript_hash_hex?: string | null;
     pqc_enabled: boolean;
     tunnel: TunnelStatus;
-    notes: string[];
   } | null;
-};
-
-export type ProjectSnapshot = {
-  title: string;
-  summary: string;
-  architecture: {
-    title: string;
-    description: string;
-    details: string[];
-  }[];
-  phases: PhaseStatus[];
 };
 
 export type Profile = {
@@ -91,7 +71,6 @@ export type MessageResponse = {
 
 export type DashboardSnapshot = {
   status: RuntimeStatus;
-  snapshot: ProjectSnapshot;
   profiles: Profile[];
   handshake: HandshakeDemo;
 };

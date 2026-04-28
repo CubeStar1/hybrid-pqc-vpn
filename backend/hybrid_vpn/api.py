@@ -46,14 +46,6 @@ def create_agent_app(agent: AgentService, gateway_url: str | None = None) -> Fas
     def get_profiles():
         return agent.profiles()
 
-    @app.get("/snapshot")
-    def get_snapshot():
-        return agent.snapshot()
-
-    @app.get("/architecture")
-    def get_architecture():
-        return agent.architecture()
-
     @app.post("/demo/handshake")
     def demo_handshake():
         return run_demo_handshake()
@@ -96,10 +88,6 @@ def create_gateway_app(gateway: GatewayService) -> FastAPI:
     @app.post("/handshake")
     def handshake(client_hello: ClientHelloMessage):
         return gateway.perform_handshake(client_hello)
-
-    @app.get("/architecture")
-    def get_architecture():
-        return gateway.architecture_cards()
 
     @app.get("/runtime-mode")
     def runtime_mode():

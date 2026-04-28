@@ -5,17 +5,16 @@ import { useDeferredValue, useEffect, useState, useTransition } from "react";
 import { DEFAULT_AGENT_API } from "./constants";
 import { getCurrentProfile, getProfileDescription } from "./helpers";
 import { useConnectSession, useDashboardSnapshot, useDisconnectSession, useElectronRuntime } from "./queries";
-import { ActivityPanel } from "./components/activity-panel";
-import { ConnectionPanel } from "./components/connection-panel";
+import { ConnectionHero } from "./components/connection-hero";
 import { DashboardHeader } from "./components/dashboard-header";
-import { NetworkOverview } from "./components/network-overview";
-import { ProfileCard } from "./components/profile-card";
+import { ServerCard } from "./components/server-card";
+import { SessionCard } from "./components/session-card";
+import { StatTiles } from "./components/stat-tiles";
 
 export function VpnDashboard(): React.JSX.Element {
   const [apiBase, setApiBase] = useState(DEFAULT_AGENT_API);
   const [apiDraft, setApiDraft] = useState(DEFAULT_AGENT_API);
   const [selectedProfileId, setSelectedProfileId] = useState("lab-gateway");
-  const [connectMessage, setConnectMessage] = useState("VPN agent has not been queried yet.");
   const [isApplyingEndpoint, startApplyEndpoint] = useTransition();
 
   const deferredApiBase = useDeferredValue(apiBase);
@@ -38,17 +37,6 @@ export function VpnDashboard(): React.JSX.Element {
     }
   }, [dashboardQuery.data?.profiles]);
 
-  useEffect(() => {
-    if (dashboardQuery.isSuccess) {
-      setConnectMessage("Local VPN agent is reachable and ready.");
-      return;
-    }
-
-    if (dashboardQuery.isError) {
-      setConnectMessage("VPN agent is offline. Start the local control API and refresh.");
-    }
-  }, [dashboardQuery.isError, dashboardQuery.isSuccess]);
-
   const status = dashboardQuery.data?.status;
   const handshake = dashboardQuery.data?.handshake;
   const profiles = dashboardQuery.data?.profiles ?? [];
@@ -60,87 +48,78 @@ export function VpnDashboard(): React.JSX.Element {
   const isOnline = Boolean(status);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.08),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.12),transparent_50%)]">
-      <div className="animate-fade-in mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-background">
+      <div className="animate-fade-in mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
         <DashboardHeader isOnline={isOnline} />
 
-        <NetworkOverview
-          isOnline={isOnline}
-          oqsAvailable={Boolean(status?.oqs_available)}
-          identityReady={Boolean(status?.server_identity_ready)}
-          transcriptBytes={handshake?.transcript_bytes}
-        />
+        {/* ── Bento grid ──────────────────────────────────────────── */}
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
+          {/* Row 1: Hero + Stats */}
+          <div className="grid gap-3 lg:grid-cols-[1.4fr_0.6fr]  lg:col-span-2">
+            <ConnectionHero
+              isConnected={isConnected}
+              isTunnelActive={Boolean(status?.current_session?.tunnel.active)}
+              sessionState={sessionState}
+              profileName={currentProfile?.name ?? "No profile selected"}
+              canConnect={Boolean(selectedProfileId)}
+              isBusy={isBusy}
+              isRefreshing={dashboardQuery.isFetching}
+              onConnect={() => connectMutation.mutate(selectedProfileId)}
+              onDisconnect={() => disconnectMutation.mutate()}
+              onRefresh={() => void dashboardQuery.refetch()}
+            />
 
-        <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-          <ConnectionPanel
-            isConnected={isConnected}
-            isTunnelActive={Boolean(status?.current_session?.tunnel.active)}
-            sessionState={sessionState}
-            profileName={currentProfile?.name ?? "No profile selected"}
-            connectMessage={connectMessage}
-            lastHandshake={
-              handshake
-                ? `${handshake.authentication_verified ? "Verified" : "Pending"} · ${
-                    handshake.oqs_available ? "PQC ready" : "PQC unavailable"
-                  }`
-                : "Awaiting handshake data."
-            }
-            canConnect={Boolean(selectedProfileId)}
-            isBusy={isBusy}
-            isRefreshing={dashboardQuery.isFetching}
-            onConnect={() => {
-              setConnectMessage("Requesting a VPN session from the local agent.");
-              connectMutation.mutate(selectedProfileId);
-            }}
-            onDisconnect={() => {
-              setConnectMessage("Disconnecting the current VPN session.");
-              disconnectMutation.mutate();
-            }}
-            onRefresh={() => void dashboardQuery.refetch()}
-          />
+            <StatTiles
+              isOnline={isOnline}
+              oqsAvailable={Boolean(status?.oqs_available)}
+              identityReady={Boolean(status?.server_identity_ready)}
+              transcriptBytes={handshake?.transcript_bytes}
+            />
+          </div>
 
-          <ProfileCard
-            apiDraft={apiDraft}
-            onApiDraftChange={setApiDraft}
-            onApplyEndpoint={() => startApplyEndpoint(() => setApiBase(apiDraft))}
-            isApplyingEndpoint={isApplyingEndpoint}
-            selectedProfileId={selectedProfileId}
-            onProfileChange={setSelectedProfileId}
-            profiles={profileOptions}
-            profileDescription={getProfileDescription(currentProfile)}
-            profileDetails={
-              currentProfile
-                ? {
-                    gatewayHost: currentProfile.gateway_host,
-                    gatewayPort: currentProfile.gateway_port,
-                    tunnelCidr: currentProfile.tunnel_cidr,
-                    mtu: currentProfile.mtu,
-                    supportedSuite: currentProfile.supported_suite,
-                  }
-                : undefined
-            }
-          />
+          {/* Row 2: Server + Session */}
+          <div className="grid gap-3 lg:grid-cols-2 lg:col-span-2">
+            <ServerCard
+              apiDraft={apiDraft}
+              onApiDraftChange={setApiDraft}
+              onApplyEndpoint={() => startApplyEndpoint(() => setApiBase(apiDraft))}
+              isApplyingEndpoint={isApplyingEndpoint}
+              selectedProfileId={selectedProfileId}
+              onProfileChange={setSelectedProfileId}
+              profiles={profileOptions}
+              profileDescription={getProfileDescription(currentProfile)}
+              profileDetails={
+                currentProfile
+                  ? {
+                      gatewayHost: currentProfile.gateway_host,
+                      gatewayPort: currentProfile.gateway_port,
+                      tunnelCidr: currentProfile.tunnel_cidr,
+                      mtu: currentProfile.mtu,
+                      supportedSuite: currentProfile.supported_suite,
+                    }
+                  : undefined
+              }
+            />
+
+            <SessionCard
+              session={
+                status?.current_session
+                  ? {
+                      profileId: status.current_session.profile_id,
+                      username: status.current_session.username,
+                      suite: status.current_session.suite,
+                      state: status.current_session.state,
+                      tunnelActive: status.current_session.tunnel.active,
+                      remoteEndpoint: status.current_session.tunnel.remote_endpoint,
+                      localAddress: status.current_session.tunnel.local_address,
+                      transcriptHash: status.current_session.transcript_hash_hex,
+                      pqcEnabled: status.current_session.pqc_enabled,
+                    }
+                  : null
+              }
+            />
+          </div>
         </div>
-
-        <ActivityPanel
-          session={
-            status?.current_session
-              ? {
-                  profileId: status.current_session.profile_id,
-                  username: status.current_session.username,
-                  suite: status.current_session.suite,
-                  state: status.current_session.state,
-                  tunnelActive: status.current_session.tunnel.active,
-                  remoteEndpoint: status.current_session.tunnel.remote_endpoint,
-                  localAddress: status.current_session.tunnel.local_address,
-                  transcriptHash: status.current_session.transcript_hash_hex,
-                  pqcEnabled: status.current_session.pqc_enabled,
-                  notes: status.current_session.notes,
-                }
-              : null
-          }
-          runtime={runtimeQuery.data}
-        />
       </div>
     </main>
   );

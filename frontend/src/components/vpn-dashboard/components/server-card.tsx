@@ -18,7 +18,7 @@ type ProfileDetails = {
   supportedSuite: string;
 };
 
-type ProfileCardProps = {
+type ServerCardProps = {
   apiDraft: string;
   onApiDraftChange: (value: string) => void;
   onApplyEndpoint: () => void;
@@ -30,7 +30,7 @@ type ProfileCardProps = {
   profileDetails?: ProfileDetails;
 };
 
-export function ProfileCard({
+export function ServerCard({
   apiDraft,
   onApiDraftChange,
   onApplyEndpoint,
@@ -40,10 +40,15 @@ export function ProfileCard({
   profiles,
   profileDescription,
   profileDetails,
-}: ProfileCardProps): React.JSX.Element {
+}: ServerCardProps): React.JSX.Element {
   return (
-    <section className="space-y-5">
-      <h2 className="text-lg font-semibold text-foreground">Server & endpoint</h2>
+    <div className="bento-card p-5 space-y-4 animate-tile-in" style={{ animationDelay: "60ms" }}>
+      <div className="flex items-center gap-2 mb-1">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Globe className="size-4" />
+        </div>
+        <h3 className="text-sm font-semibold text-foreground">Server & Endpoint</h3>
+      </div>
 
       <FieldGroup>
         <Field>
@@ -52,6 +57,7 @@ export function ProfileCard({
             <Input
               value={apiDraft}
               onChange={(event) => onApiDraftChange(event.target.value)}
+              className="font-mono text-xs"
             />
             <FieldDescription>Loopback API of the local VPN agent.</FieldDescription>
           </FieldContent>
@@ -72,7 +78,7 @@ export function ProfileCard({
               </SelectContent>
             </Select>
             <FieldDescription className="break-words">
-              A profile is a saved gateway/tunnel target. {profileDescription}
+              {profileDescription}
             </FieldDescription>
           </FieldContent>
         </Field>
@@ -80,38 +86,35 @@ export function ProfileCard({
 
       <Button
         variant="outline"
+        size="sm"
         className="w-full rounded-full"
         onClick={onApplyEndpoint}
         disabled={isApplyingEndpoint}
       >
-        <Settings2 />
+        <Settings2 className="size-3.5" />
         Apply endpoint
       </Button>
 
-      {/* Server details — flat definition list, no individual cards */}
-      <div className="space-y-3 rounded-xl border border-border/60 bg-muted/20 p-4">
-        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <Globe className="size-4 text-primary" />
-          Server details
+      {/* Server details grid */}
+      {profileDetails && (
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t border-border/40">
+          <DetailItem label="Gateway" value={`${profileDetails.gatewayHost}:${profileDetails.gatewayPort}`} />
+          <DetailItem label="Tunnel range" value={profileDetails.tunnelCidr} />
+          <DetailItem label="MTU" value={String(profileDetails.mtu)} />
+          <DetailItem label="Cipher suite" value={profileDetails.supportedSuite} mono />
         </div>
-        <dl className="grid gap-x-6 gap-y-2.5 text-sm sm:grid-cols-2">
-          <DefItem label="Gateway" value={profileDetails ? `${profileDetails.gatewayHost}:${profileDetails.gatewayPort}` : "—"} />
-          <DefItem label="Tunnel range" value={profileDetails?.tunnelCidr ?? "—"} />
-          <DefItem label="MTU" value={profileDetails ? String(profileDetails.mtu) : "—"} />
-          <DefItem label="Cipher suite" value={profileDetails?.supportedSuite ?? "—"} />
-        </dl>
-      </div>
-    </section>
+      )}
+    </div>
   );
 }
 
-function DefItem({ label, value }: { label: string; value: string }) {
+function DetailItem({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="grid min-w-0 grid-cols-[minmax(0,92px)_minmax(0,1fr)] items-start gap-3 border-b border-border/40 pb-2 last:border-0">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 break-words text-right text-sm font-medium leading-snug text-foreground">
+    <div className="min-w-0">
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70">{label}</p>
+      <p className={`text-sm font-medium text-foreground truncate ${mono ? "font-mono text-xs" : ""}`}>
         {value}
-      </dd>
+      </p>
     </div>
   );
 }

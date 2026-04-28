@@ -12,21 +12,6 @@ def utc_now() -> datetime:
     return datetime.now(tz=UTC)
 
 
-# ── Phase / status ───────────────────────────────────────────────────
-
-
-class PhaseStatus(BaseModel):
-    name: str
-    status: Literal["complete", "in_progress", "planned"]
-    summary: str
-
-
-class ArchitectureCard(BaseModel):
-    title: str
-    description: str
-    details: list[str]
-
-
 # ── Profiles ─────────────────────────────────────────────────────────
 
 
@@ -49,7 +34,6 @@ class RuntimeContext(BaseModel):
     linux_vm_target: bool
     tun_interface: str | None = None
     control_api: str | None = None
-    notes: list[str] = Field(default_factory=list)
 
 
 class TunnelStatus(BaseModel):
@@ -73,14 +57,12 @@ class SessionSummary(BaseModel):
     pqc_enabled: bool = False
     connected_at: datetime = Field(default_factory=utc_now)
     tunnel: TunnelStatus = Field(default_factory=TunnelStatus)
-    notes: list[str] = Field(default_factory=list)
 
 
 class RuntimeStatus(BaseModel):
     service: str
     version: str
     runtime: RuntimeContext
-    phases: list[PhaseStatus]
     current_session: SessionSummary | None = None
     oqs_available: bool
     server_identity_ready: bool
@@ -126,13 +108,3 @@ class ServerHelloMessage(BaseModel):
     ecdsa_signature_hex: str
     ecdsa_public_key_der_hex: str
     transcript_hash_hex: str
-
-
-# ── Project snapshot ─────────────────────────────────────────────────
-
-
-class ProjectSnapshot(BaseModel):
-    title: str
-    summary: str
-    architecture: list[ArchitectureCard]
-    phases: list[PhaseStatus]

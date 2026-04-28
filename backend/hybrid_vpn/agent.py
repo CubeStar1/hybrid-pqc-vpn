@@ -19,13 +19,10 @@ from .crypto.hybrid import (
 from .crypto.pqc import is_oqs_available
 from .schemas import (
     AgentProfileSummary,
-    ArchitectureCard,
     ClientHelloMessage,
     ConnectRequest,
     ConnectResponse,
     DisconnectResponse,
-    PhaseStatus,
-    ProjectSnapshot,
     RuntimeContext,
     RuntimeStatus,
     SessionSummary,
@@ -60,42 +57,6 @@ class AgentService:
             )
         ]
 
-    # ── Phase tracking ───────────────────────────────────────────────
-
-    def phases(self) -> list[PhaseStatus]:
-        return [
-            PhaseStatus(
-                name="Phase 1",
-                status="complete",
-                summary="Hybrid cryptographic harness: X25519 + ML-KEM-768, HKDF key schedule, ECDSA-P256 transcript auth.",
-            ),
-            PhaseStatus(
-                name="Phase 2",
-                status="complete",
-                summary="UDP framing with AES-256-GCM encryption, sequence-number replay protection.",
-            ),
-            PhaseStatus(
-                name="Phase 3",
-                status="complete",
-                summary="Linux TUN device creation via /dev/net/tun, IP/route management via pyroute2, teardown.",
-            ),
-            PhaseStatus(
-                name="Phase 4",
-                status="complete",
-                summary="Electron + Next.js desktop dashboard connected to the agent control API.",
-            ),
-            PhaseStatus(
-                name="Phase 5",
-                status="planned",
-                summary="Metrics, experiments, and report export views come after the first end-to-end control loop.",
-            ),
-            PhaseStatus(
-                name="Phase 6",
-                status="planned",
-                summary="Hybrid ECDSA + ML-DSA-65 dual-signature authentication.",
-            ),
-        ]
-
     # ── Runtime info ─────────────────────────────────────────────────
 
     def runtime_context(self) -> RuntimeContext:
@@ -105,52 +66,6 @@ class AgentService:
             linux_vm_target=self.config.linux_vm_target,
             tun_interface=self.config.tun_interface,
             control_api=self.config.resolved_api_base_url,
-            notes=[
-                "Primary runtime target is a Linux VM for both Electron and the Python tunnel agent.",
-                f"TUN interface: {self.config.tun_interface} ({self.config.tun_address}/{self.config.tun_prefixlen})",
-                f"UDP data-plane port: {self.config.udp_local_port}",
-            ],
-        )
-
-    def architecture(self) -> list[ArchitectureCard]:
-        return [
-            ArchitectureCard(
-                title="Desktop Controller",
-                description="Electron + Next.js renderer for profile selection, auth, connect/disconnect, logs, and metrics.",
-                details=[
-                    "Renderer stays unprivileged and talks to the local Python agent over a loopback control API.",
-                    "Electron preload exposes runtime context safely instead of granting direct Node access.",
-                ],
-            ),
-            ArchitectureCard(
-                title="Hybrid Control Plane",
-                description="TLS 1.3-inspired handshake with transcript-bound key derivation.",
-                details=[
-                    f"Active suite: {SUITE_NAME}.",
-                    "Pinned ECDSA-P256 authenticates the transcript.",
-                    "ML-KEM-768 via liboqs-python when liboqs is installed.",
-                ],
-            ),
-            ArchitectureCard(
-                title="Encrypted Tunnel",
-                description="TUN device + AES-256-GCM encrypted UDP transport with replay protection.",
-                details=[
-                    f"TUN: {self.config.tun_interface} at {self.config.tun_address}/{self.config.tun_prefixlen}",
-                    f"UDP local port: {self.config.udp_local_port}, gateway port: {self.config.default_profile.gateway_port}",
-                    "Sequence-number nonces prevent replay attacks.",
-                ],
-            ),
-        ]
-
-    def snapshot(self) -> ProjectSnapshot:
-        return ProjectSnapshot(
-            title="Hybrid Post-Quantum VPN for Linux VMs",
-            summary=(
-                "A research-grade VPN prototype with a Python control plane, encrypted UDP tunnel, "
-                "Linux TUN device management, and an Electron + Next.js desktop controller."
-            ),
-            architecture=self.architecture(),
-            phases=self.phases(),
         )
 
     # ── Status ───────────────────────────────────────────────────────
@@ -160,7 +75,6 @@ class AgentService:
             service="hybrid-vpn-agent",
             version="0.1.0",
             runtime=self.runtime_context(),
-            phases=self.phases(),
             current_session=self._current_session,
             oqs_available=is_oqs_available(),
             server_identity_ready=True,
@@ -171,7 +85,6 @@ class AgentService:
     def connect(self, request: ConnectRequest, gateway_url: str | None = None) -> ConnectResponse:
         """Connect: authenticate → handshake → (optionally) start tunnel."""
         profile = self.config.default_profile
-        notes: list[str] = []
 
         # ── Step 1: Authenticate with gateway (if reachable) ─────────
         if gateway_url:
@@ -183,9 +96,8 @@ class AgentService:
                 )
                 if not auth_resp.json().get("authenticated", False):
                     return self._fail_session(request, "Gateway authentication failed.")
-                notes.append("Gateway authentication succeeded.")
             except httpx.HTTPError:
-                notes.append("Gateway unreachable — running local-only handshake.")
+                logger.warning("Gateway unreachable — running local-only handshake.")
 
         # ── Step 2: Hybrid handshake ─────────────────────────────────
         handshake_client = HandshakeClient()
@@ -209,14 +121,12 @@ class AgentService:
                 )
                 traffic_secrets = handshake_client.finish(client_hello, server_hello)
                 self._traffic_secrets = traffic_secrets
-                notes.append("Hybrid handshake completed with gateway.")
             except Exception as exc:
-                notes.append(f"Gateway handshake failed ({exc}), falling back to local demo.")
+                logger.warning("Gateway handshake failed (%s), falling back to local demo.", exc)
                 self._traffic_secrets = None
         else:
             # Local-only demo handshake
-            demo = run_demo_handshake()
-            notes.extend(demo.notes)
+            run_demo_handshake()
 
         # ── Step 3: Start tunnel (Linux only) ────────────────────────
         tunnel_status = TunnelStatus()
@@ -238,11 +148,11 @@ class AgentService:
                     local_address=f"{self.config.tun_address}/{self.config.tun_prefixlen}",
                     remote_endpoint=f"{profile.gateway_host}:{profile.gateway_port}",
                 )
-                notes.append(f"Tunnel active: {self.config.tun_interface} ↔ UDP :{self.config.udp_local_port}")
+                logger.info("Tunnel active: %s ↔ UDP :%d", self.config.tun_interface, self.config.udp_local_port)
             except Exception as exc:
-                notes.append(f"Tunnel creation failed: {exc}")
+                logger.error("Tunnel creation failed: %s", exc)
         elif not IS_LINUX:
-            notes.append("Tunnel skipped — requires Linux with root privileges.")
+            logger.info("Tunnel skipped — requires Linux with root privileges.")
 
         # ── Step 4: Build session ────────────────────────────────────
         session = SessionSummary(
@@ -254,7 +164,6 @@ class AgentService:
             transcript_hash_hex=server_hello.transcript_hash_hex if gateway_url and self._traffic_secrets else None,
             pqc_enabled=is_oqs_available(),
             tunnel=tunnel_status,
-            notes=notes,
         )
         self._current_session = session
         return ConnectResponse(accepted=True, message="Session established.", session=session)
@@ -280,7 +189,6 @@ class AgentService:
             transcript_hash_hex=self._current_session.transcript_hash_hex,
             pqc_enabled=self._current_session.pqc_enabled,
             tunnel=TunnelStatus(active=False, **stats),
-            notes=[f"Disconnected: {reason}"],
         )
         return DisconnectResponse(disconnected=True, message="Session disconnected.")
 
@@ -291,6 +199,5 @@ class AgentService:
             profile_id=request.profile_id,
             username=request.username,
             suite=SUITE_NAME,
-            notes=[message],
         )
         return ConnectResponse(accepted=False, message=message, session=self._current_session)
