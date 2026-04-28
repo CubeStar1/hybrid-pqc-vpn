@@ -3,13 +3,20 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from .agent import AgentService
 from .config import RuntimeMode
 from .crypto.hybrid import run_demo_handshake
 from .gateway import GatewayService
-from .schemas import ClientHelloMessage, ConnectRequest, DisconnectRequest
+from .schemas import (
+    ClientHelloMessage,
+    ConnectRequest,
+    DisconnectRequest,
+    GatewaySessionStartRequest,
+    GatewaySessionStopRequest,
+)
 
 
 def _add_cors(app: FastAPI) -> None:
@@ -80,6 +87,10 @@ def create_gateway_app(gateway: GatewayService) -> FastAPI:
     def health():
         return {"status": "ok", "service": "gateway"}
 
+    @app.get("/status")
+    def get_status():
+        return gateway.status()
+
     @app.post("/auth")
     def authenticate(payload: dict):
         ok = gateway.authenticate(payload.get("username", ""), payload.get("password", ""))
@@ -88,6 +99,21 @@ def create_gateway_app(gateway: GatewayService) -> FastAPI:
     @app.post("/handshake")
     def handshake(client_hello: ClientHelloMessage):
         return gateway.perform_handshake(client_hello)
+
+    @app.post("/session/start")
+    def start_session(payload: GatewaySessionStartRequest, request: Request):
+        client_host = request.client.host if request.client else None
+        if not client_host:
+            return {"accepted": False, "message": "Could not determine client source address."}
+        return gateway.start_session(
+            username=payload.username,
+            profile_id=payload.profile_id,
+            client_addr=(client_host, payload.client_udp_port),
+        )
+
+    @app.post("/session/stop")
+    def stop_session(payload: GatewaySessionStopRequest):
+        return gateway.stop_session(payload.reason)
 
     @app.get("/runtime-mode")
     def runtime_mode():

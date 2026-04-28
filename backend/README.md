@@ -41,6 +41,7 @@ uv run pytest tests/ -v
 - `liboqs-python` is required for real `ML-KEM-768` runs — needs `liboqs` C library installed on the system.
 - Without a working `oqs` install, the control API still loads but reports PQC as unavailable.
 - TUN/route management requires Linux with root privileges. On other platforms the tunnel is gracefully skipped.
+- Full-tunnel gateway mode requires `HYBRID_VPN_GATEWAY_UPLINK_IFACE` so the gateway can apply forwarding/NAT on the correct NIC.
 - If `sudo uv ...` fails with `sudo: uv: command not found`, `uv` is likely installed in `~/.local/bin`.
   Use `sudo /home/<your-user>/.local/bin/uv ...`, `sudo env "PATH=$PATH" uv ...`, or
   `sudo ./.venv/bin/python main.py ...` from `backend/`.

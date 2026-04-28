@@ -12,10 +12,13 @@ from __future__ import annotations
 import logging
 import os
 import platform
+import json
+import subprocess
 import socket
 import struct
 import threading
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from .crypto.classical import aes_gcm_decrypt, aes_gcm_encrypt
 
@@ -101,29 +104,259 @@ def configure_tun(name: str, address: str, prefixlen: int, mtu: int) -> None:
     logger.info("Configured %s: %s/%d mtu=%d UP", name, address, prefixlen, mtu)
 
 
-def add_route(destination: str, prefixlen: int, device: str) -> None:
-    """Add a route through the specified device."""
-    _require_linux("Route management")
+def interface_exists(name: str) -> bool:
+    _require_linux("Interface lookup")
     from pyroute2 import IPRoute
 
     with IPRoute() as ipr:
-        idx = ipr.link_lookup(ifname=device)
-        if not idx:
-            raise RuntimeError(f"Interface {device} not found")
-        ipr.route("add", dst=f"{destination}/{prefixlen}", oif=idx[0])
-    logger.info("Route added: %s/%d via %s", destination, prefixlen, device)
+        return bool(ipr.link_lookup(ifname=name))
 
 
-def teardown_tun(name: str) -> None:
-    """Bring down a TUN interface."""
+def cleanup_tun_interface(name: str) -> None:
+    """Delete a TUN interface if it still exists."""
     _require_linux("TUN teardown")
     from pyroute2 import IPRoute
 
     with IPRoute() as ipr:
         idx = ipr.link_lookup(ifname=name)
         if idx:
-            ipr.link("set", index=idx[0], state="down")
-    logger.info("Interface %s brought down", name)
+            index = idx[0]
+            try:
+                ipr.addr("flush", index=index)
+            except Exception:
+                logger.debug("Address flush failed for %s", name, exc_info=True)
+            try:
+                ipr.link("set", index=index, state="down")
+            except Exception:
+                logger.debug("Link down failed for %s", name, exc_info=True)
+            try:
+                ipr.link("del", index=index)
+            except Exception:
+                logger.debug("Link delete failed for %s", name, exc_info=True)
+    logger.info("Interface %s cleaned up", name)
+
+
+def run_command(args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
+    _require_linux("Command execution")
+    return subprocess.run(args, check=check, capture_output=True, text=True)
+
+
+def _parse_json_command(args: list[str]) -> list[dict]:
+    result = run_command(args)
+    try:
+        payload = json.loads(result.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Failed to parse JSON from {' '.join(args)}: {exc}") from exc
+    if not isinstance(payload, list):
+        raise RuntimeError(f"Unexpected JSON payload from {' '.join(args)}")
+    return payload
+
+
+@dataclass
+class DefaultRouteRecord:
+    dev: str
+    gateway: str | None = None
+    prefsrc: str | None = None
+    metric: int | None = None
+
+
+@dataclass
+class HostRouteRecord:
+    dev: str
+    gateway: str | None = None
+    prefsrc: str | None = None
+
+
+class ClientRouteManager:
+    """Captures and restores the client's routing state for a full-tunnel session."""
+
+    def __init__(self, tun_name: str, gateway_host: str) -> None:
+        self.tun_name = tun_name
+        self.gateway_host = gateway_host
+        self._saved_defaults: list[DefaultRouteRecord] = []
+        self._gateway_route: HostRouteRecord | None = None
+        self._active = False
+
+    @property
+    def is_active(self) -> bool:
+        return self._active
+
+    def apply_full_tunnel(self) -> None:
+        _require_linux("Client route management")
+        if self._active:
+            return
+
+        default_routes = _parse_json_command(["ip", "-j", "route", "show", "default"])
+        if not default_routes:
+            raise RuntimeError("No default route found to preserve before enabling the VPN")
+
+        self._saved_defaults = [
+            DefaultRouteRecord(
+                dev=route["dev"],
+                gateway=route.get("gateway"),
+                prefsrc=route.get("prefsrc"),
+                metric=route.get("metric"),
+            )
+            for route in default_routes
+            if route.get("dev")
+        ]
+
+        gateway_route = _parse_json_command(["ip", "-j", "route", "get", self.gateway_host])
+        if not gateway_route:
+            raise RuntimeError(f"Could not resolve a route to gateway host {self.gateway_host}")
+        resolved = gateway_route[0]
+        dev = resolved.get("dev")
+        if not dev:
+            raise RuntimeError(f"Gateway route for {self.gateway_host} did not include an outbound device")
+        self._gateway_route = HostRouteRecord(
+            dev=dev,
+            gateway=resolved.get("gateway"),
+            prefsrc=resolved.get("prefsrc"),
+        )
+
+        host_route = ["ip", "route", "replace", f"{self.gateway_host}/32"]
+        if self._gateway_route.gateway:
+            host_route.extend(["via", self._gateway_route.gateway])
+        host_route.extend(["dev", self._gateway_route.dev])
+        if self._gateway_route.prefsrc:
+            host_route.extend(["src", self._gateway_route.prefsrc])
+        run_command(host_route)
+        run_command(["ip", "route", "replace", "default", "dev", self.tun_name])
+        self._active = True
+        logger.info("Full-tunnel route override enabled via %s", self.tun_name)
+
+    def restore(self) -> None:
+        _require_linux("Client route restore")
+        if not self._active:
+            return
+
+        try:
+            run_command(["ip", "route", "del", "default", "dev", self.tun_name], check=False)
+            for route in self._saved_defaults:
+                restore_cmd = ["ip", "route", "replace", "default"]
+                if route.gateway:
+                    restore_cmd.extend(["via", route.gateway])
+                restore_cmd.extend(["dev", route.dev])
+                if route.prefsrc:
+                    restore_cmd.extend(["src", route.prefsrc])
+                if route.metric is not None:
+                    restore_cmd.extend(["metric", str(route.metric)])
+                run_command(restore_cmd)
+            run_command(["ip", "route", "del", f"{self.gateway_host}/32"], check=False)
+        finally:
+            self._saved_defaults = []
+            self._gateway_route = None
+            self._active = False
+            logger.info("Full-tunnel route override removed")
+
+
+class GatewayNetworkManager:
+    """Manages gateway forwarding/NAT state for a single tunnel subnet."""
+
+    def __init__(self, tun_name: str, tunnel_cidr: str, uplink_iface: str) -> None:
+        self.tun_name = tun_name
+        self.tunnel_cidr = tunnel_cidr
+        self.uplink_iface = uplink_iface
+        self._active = False
+        self._ip_forward_path = Path("/proc/sys/net/ipv4/ip_forward")
+        self._previous_ip_forward: str | None = None
+
+    @property
+    def is_active(self) -> bool:
+        return self._active
+
+    def apply(self) -> None:
+        _require_linux("Gateway network setup")
+        if self._active:
+            return
+
+        self._previous_ip_forward = self._ip_forward_path.read_text(encoding="utf-8").strip()
+        if self._previous_ip_forward != "1":
+            self._ip_forward_path.write_text("1\n", encoding="utf-8")
+
+        self._ensure_iptables_rule(
+            ["-A", "FORWARD", "-i", self.tun_name, "-o", self.uplink_iface, "-j", "ACCEPT"],
+        )
+        self._ensure_iptables_rule(
+            [
+                "-A",
+                "FORWARD",
+                "-i",
+                self.uplink_iface,
+                "-o",
+                self.tun_name,
+                "-m",
+                "state",
+                "--state",
+                "RELATED,ESTABLISHED",
+                "-j",
+                "ACCEPT",
+            ],
+        )
+        self._ensure_iptables_rule(
+            ["-t", "nat", "-A", "POSTROUTING", "-s", self.tunnel_cidr, "-o", self.uplink_iface, "-j", "MASQUERADE"],
+        )
+        self._active = True
+        logger.info("Gateway forwarding/NAT enabled on %s", self.uplink_iface)
+
+    def teardown(self) -> None:
+        _require_linux("Gateway network teardown")
+        if not self._active:
+            return
+
+        try:
+            self._delete_iptables_rule(
+                ["-t", "nat", "-D", "POSTROUTING", "-s", self.tunnel_cidr, "-o", self.uplink_iface, "-j", "MASQUERADE"],
+            )
+            self._delete_iptables_rule(
+                [
+                    "-D",
+                    "FORWARD",
+                    "-i",
+                    self.uplink_iface,
+                    "-o",
+                    self.tun_name,
+                    "-m",
+                    "state",
+                    "--state",
+                    "RELATED,ESTABLISHED",
+                    "-j",
+                    "ACCEPT",
+                ],
+            )
+            self._delete_iptables_rule(
+                ["-D", "FORWARD", "-i", self.tun_name, "-o", self.uplink_iface, "-j", "ACCEPT"],
+            )
+            if self._previous_ip_forward is not None and self._previous_ip_forward != "1":
+                self._ip_forward_path.write_text(f"{self._previous_ip_forward}\n", encoding="utf-8")
+        finally:
+            self._active = False
+            logger.info("Gateway forwarding/NAT removed")
+
+    def _ensure_iptables_rule(self, rule_args: list[str]) -> None:
+        check_args = self._rule_with_check_flag(rule_args)
+        result = run_command(check_args, check=False)
+        if result.returncode != 0:
+            run_command(["iptables", *rule_args])
+
+    def _delete_iptables_rule(self, rule_args: list[str]) -> None:
+        check_args = self._rule_with_check_flag(rule_args)
+        result = run_command(check_args, check=False)
+        if result.returncode == 0:
+            run_command(["iptables", *rule_args])
+
+    def _rule_with_check_flag(self, rule_args: list[str]) -> list[str]:
+        if rule_args[:2] == ["-t", "nat"]:
+            return ["iptables", "-t", "nat", "-C", *rule_args[3:]]
+        return ["iptables", "-C", *rule_args[1:]]
+
+
+@dataclass
+class TunnelRuntimeState:
+    local_tunnel_ready: bool = False
+    remote_tunnel_ready: bool = False
+    route_override_active: bool = False
+    gateway_nat_active: bool = False
 
 
 # ── Encrypted UDP transport ──────────────────────────────────────────
@@ -133,7 +366,8 @@ def teardown_tun(name: str) -> None:
 class UdpTransport:
     """AES-256-GCM encrypted UDP datagram transport with replay protection."""
 
-    key: bytes  # 32-byte AES-256 key
+    send_key: bytes
+    recv_key: bytes
     local_port: int
     remote_addr: tuple[str, int]
     _sock: socket.socket | None = field(default=None, init=False, repr=False)
@@ -160,7 +394,7 @@ class UdpTransport:
         self._send_seq += 1
         # 12-byte nonce: 4-byte seq number + 8 zero bytes
         nonce = self._send_seq.to_bytes(SEQ_SIZE, "big") + b"\x00" * 8
-        ciphertext = aes_gcm_encrypt(self.key, nonce, plaintext)
+        ciphertext = aes_gcm_encrypt(self.send_key, nonce, plaintext)
         frame = self._send_seq.to_bytes(SEQ_SIZE, "big") + ciphertext
         self._sock.sendto(frame, self.remote_addr)
 
@@ -187,7 +421,7 @@ class UdpTransport:
 
         nonce = seq.to_bytes(SEQ_SIZE, "big") + b"\x00" * 8
         try:
-            return aes_gcm_decrypt(self.key, nonce, data[SEQ_SIZE:])
+            return aes_gcm_decrypt(self.recv_key, nonce, data[SEQ_SIZE:])
         except Exception:
             logger.warning("Decryption failed for seq=%d", seq)
             return None
@@ -209,12 +443,18 @@ class TunnelManager:
         tun_address: str,
         tun_prefixlen: int,
         tun_mtu: int,
-        udp_key: bytes,
+        udp_send_key: bytes,
+        udp_recv_key: bytes,
         udp_local_port: int,
         udp_remote_addr: tuple[str, int],
     ) -> None:
         self.tun = TunDevice(name=tun_name, mtu=tun_mtu)
-        self.udp = UdpTransport(key=udp_key, local_port=udp_local_port, remote_addr=udp_remote_addr)
+        self.udp = UdpTransport(
+            send_key=udp_send_key,
+            recv_key=udp_recv_key,
+            local_port=udp_local_port,
+            remote_addr=udp_remote_addr,
+        )
         self._address = tun_address
         self._prefixlen = tun_prefixlen
         self._running = False
@@ -232,6 +472,12 @@ class TunnelManager:
     def start(self) -> None:
         """Open TUN, configure interface, bind UDP, start forwarding."""
         _require_linux("Tunnel start")
+        if self._running:
+            logger.info("TunnelManager.start() ignored; tunnel already running")
+            return
+
+        if interface_exists(self.tun.name):
+            cleanup_tun_interface(self.tun.name)
 
         self.tun.open()
         configure_tun(self.tun.name, self._address, self._prefixlen, self.tun.mtu)
@@ -247,17 +493,21 @@ class TunnelManager:
 
     def stop(self) -> None:
         """Stop forwarding, tear down TUN and UDP."""
+        if not self._running and not self.tun.is_open and self.udp._sock is None:
+            return
         self._running = False
+
+        self.udp.close()
+        self.tun.close()
+
         for t in self._threads:
             t.join(timeout=2.0)
         self._threads.clear()
 
-        self.udp.close()
         try:
-            teardown_tun(self.tun.name)
+            cleanup_tun_interface(self.tun.name)
         except Exception:
-            pass
-        self.tun.close()
+            logger.debug("Interface cleanup failed for %s", self.tun.name, exc_info=True)
         logger.info("Tunnel stopped")
 
     def _forward_tun_to_udp(self) -> None:

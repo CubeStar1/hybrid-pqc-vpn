@@ -88,6 +88,8 @@ class GatewayConfig(BaseSettings):
     tun_address: str = "10.42.0.1"
     tun_prefixlen: int = 24
     tunnel_pool: str = "10.42.0.0/24"
+    full_tunnel_enabled: bool = True
+    uplink_iface: str | None = None
     pinned_server_key_id: str = "server-ecdsa-p256-dev"
     demo_username: str = "demo"
     demo_password: str = "demo-vpn-2026"

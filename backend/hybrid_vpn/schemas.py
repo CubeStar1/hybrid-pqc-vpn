@@ -41,6 +41,10 @@ class TunnelStatus(BaseModel):
     tun_device: str | None = None
     local_address: str | None = None
     remote_endpoint: str | None = None
+    local_tunnel_ready: bool = False
+    remote_tunnel_ready: bool = False
+    route_override_active: bool = False
+    gateway_nat_active: bool = False
     packets_sent: int = 0
     packets_recv: int = 0
     bytes_sent: int = 0
@@ -91,6 +95,23 @@ class ConnectResponse(BaseModel):
     accepted: bool
     message: str
     session: SessionSummary | None = None
+
+
+class GatewaySessionStartRequest(BaseModel):
+    username: str
+    profile_id: str
+    client_udp_port: int
+
+
+class GatewaySessionStopRequest(BaseModel):
+    reason: str = "agent-request"
+
+
+class GatewaySessionResponse(BaseModel):
+    accepted: bool
+    message: str
+    tunnel: TunnelStatus = Field(default_factory=TunnelStatus)
+    session_id: str | None = None
 
 
 # ── Handshake protocol messages ──────────────────────────────────────
