@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Activity, FolderKanban, LayoutDashboard, PlugZap, ShieldCheck } from "lucide-react";
+import { Activity, FolderKanban, LayoutDashboard, Network, PlugZap, ShieldCheck } from "lucide-react";
 
 export type SidebarItem = {
   title: string;
@@ -51,6 +51,12 @@ export const sidebarGroups: SidebarGroup[] = [
         href: "/#session",
         icon: ShieldCheck,
         description: "Inspect the active tunnel and crypto details.",
+      },
+      {
+        title: "Architecture",
+        href: "/architecture",
+        icon: Network,
+        description: "Detailed visualization of the VPN and encryption flow.",
       },
     ],
   },
