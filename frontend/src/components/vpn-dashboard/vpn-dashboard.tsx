@@ -65,6 +65,7 @@ export function VpnDashboard(): React.JSX.Element {
                 profileName={currentProfile?.name ?? "No profile selected"}
                 canConnect={Boolean(selectedProfileId)}
                 isBusy={isBusy}
+                isConnecting={connectMutation.isPending}
                 isRefreshing={dashboardQuery.isFetching}
                 onConnect={() => connectMutation.mutate(selectedProfileId)}
                 onDisconnect={() => disconnectMutation.mutate()}

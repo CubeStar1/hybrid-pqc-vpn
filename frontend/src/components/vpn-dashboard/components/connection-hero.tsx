@@ -1,6 +1,15 @@
-import { Loader2, Power, PlugZap, RefreshCw, ShieldCheck, ShieldOff } from "lucide-react";
+import { Loader2, PlugZap, Power, RefreshCw, ShieldCheck, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+
+const vpnConnectionStates = [
+  { text: "Contacting the selected gateway" },
+  { text: "Negotiating the secure session" },
+  { text: "Validating tunnel permissions" },
+  { text: "Applying VPN routing rules" },
+  { text: "Finalizing protected connection" },
+];
 
 type ConnectionHeroProps = {
   isConnected: boolean;
@@ -9,6 +18,7 @@ type ConnectionHeroProps = {
   profileName: string;
   canConnect: boolean;
   isBusy: boolean;
+  isConnecting: boolean;
   isRefreshing: boolean;
   onConnect: () => void;
   onDisconnect: () => void;
@@ -22,6 +32,7 @@ export function ConnectionHero({
   profileName,
   canConnect,
   isBusy,
+  isConnecting,
   isRefreshing,
   onConnect,
   onDisconnect,
@@ -32,19 +43,24 @@ export function ConnectionHero({
       ? "Tunnel Active"
       : "Session Ready"
     : sessionState === "checking"
-      ? "Connecting…"
+      ? "Connecting..."
       : "Disconnected";
 
   const statusSubtitle = isConnected && !isTunnelActive
-    ? `${profileName} · needs TUN permissions`
+    ? `${profileName} - needs TUN permissions`
     : profileName;
 
   return (
     <div className="bento-card bento-card-hero col-span-full lg:col-span-1 flex flex-col items-center justify-center gap-6 p-8 relative overflow-hidden">
-      {/* Background shimmer */}
+      <MultiStepLoader
+        loadingStates={vpnConnectionStates}
+        loading={isConnecting}
+        duration={1100}
+        loop={false}
+      />
+
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3 pointer-events-none" />
 
-      {/* Status icon */}
       <div className="relative">
         <div
           className={`flex size-20 items-center justify-center rounded-full transition-all duration-500 ${
@@ -69,7 +85,6 @@ export function ConnectionHero({
         )}
       </div>
 
-      {/* Status text */}
       <div className="text-center relative z-10">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">
           {statusTitle}
@@ -77,7 +92,6 @@ export function ConnectionHero({
         <p className="mt-1.5 text-sm text-muted-foreground">{statusSubtitle}</p>
       </div>
 
-      {/* Action buttons */}
       <div className="flex items-center gap-3 relative z-10">
         {isConnected ? (
           <Button
