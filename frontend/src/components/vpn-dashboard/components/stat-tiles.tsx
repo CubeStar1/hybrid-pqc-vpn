@@ -18,7 +18,7 @@ type TileProps = {
 function Tile({ icon: Icon, label, value, ok, delay }: TileProps) {
   return (
     <div
-      className="bento-card flex flex-col items-center justify-center gap-2 p-4 animate-tile-in"
+      className="bento-card flex h-full min-h-0 flex-col items-center justify-center gap-2 p-4 text-center animate-tile-in"
       style={{ animationDelay: delay }}
     >
       <div
@@ -31,7 +31,7 @@ function Tile({ icon: Icon, label, value, ok, delay }: TileProps) {
         <Icon className="size-4.5" />
       </div>
       <span className="text-lg font-semibold text-foreground">{value}</span>
-      <span className="text-[11px] text-muted-foreground tracking-wide uppercase">{label}</span>
+      <span className="text-[11px] tracking-wide text-muted-foreground uppercase">{label}</span>
     </div>
   );
 }
@@ -43,7 +43,7 @@ export function StatTiles({
   transcriptBytes,
 }: StatTilesProps): React.JSX.Element {
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid h-full grid-cols-2 grid-rows-2 gap-3">
       <Tile
         icon={Activity}
         label="Agent"

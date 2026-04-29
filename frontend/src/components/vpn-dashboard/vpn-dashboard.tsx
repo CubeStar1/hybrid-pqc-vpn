@@ -54,7 +54,7 @@ export function VpnDashboard(): React.JSX.Element {
 
   return (
     <main className="bg-background">
-      <div className="animate-fade-in mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="animate-fade-in mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
         <div className="grid gap-3 lg:grid-cols-[1fr_auto]">
           <div className="grid gap-3 lg:col-span-2 lg:grid-cols-[1.4fr_0.6fr]">
             <section id="connection" className="scroll-mt-24">
