@@ -1,99 +1,17 @@
 % Appendix B: Application Screenshots
 
-This appendix provides a comprehensive visual walkthrough of the Faculty Feedback System, showcasing the key interfaces and features available to different user roles.
-
-\section*{B.1 Landing and Authentication}
+This appendix provides a visual walkthrough of the Hybrid Post-Quantum VPN desktop dashboard.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-landing.png}
-    \caption{Faculty Feedback System Landing Page -- The main entry point featuring a modern, intuitive interface that welcomes users and provides navigation to sign-in functionality.}
-    \label{fig:ss-landing}
+    \includegraphics[width=0.95\textwidth]{images/dashboard.png}
+    \caption{VPN Control Center Dashboard -- Displays connection status, agent/PQC/identity indicators, handshake state, server and endpoint configuration, and the active cipher suite.}
+    \label{fig:ss-dashboard}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{images/screenshots/faculty-feedback-signin.png}
-    \caption{User Authentication Interface -- Secure sign-in page supporting role-based authentication for administrators, faculty members, and students.}
-    \label{fig:ss-signin}
-\end{figure}
-
-\section*{B.2 Administrator Interface}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-admin-dash.png}
-    \caption{Administrator Dashboard -- The central control panel for system administrators, providing an overview of system metrics, user statistics, and quick access to management functions.}
-    \label{fig:ss-admin-dash}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-admin-roles.png}
-    \caption{Role Management Interface -- Administrators can assign and manage user roles, ensuring proper access control across the system for faculty and student accounts.}
-    \label{fig:ss-admin-roles}
-\end{figure}
-
-\section*{B.3 Faculty Interface}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-faculty-dash.png}
-    \caption{Faculty Dashboard -- A personalized workspace displaying an overview of created feedback forms, response statistics, and navigation to form management tools.}
-    \label{fig:ss-faculty-dash}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-faculty-forms.png}
-    \caption{Faculty Forms List -- A comprehensive view of all feedback forms created by the faculty member, with options to view responses, edit, share, or delete forms.}
-    \label{fig:ss-faculty-forms}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-faculty-builder.png}
-    \caption{Form Builder Interface -- An intuitive drag-and-drop form builder allowing faculty to create custom feedback forms with various question types, including multiple choice, rating scales, and open-ended questions.}
-    \label{fig:ss-faculty-builder}
-\end{figure}
-
-\section*{B.4 AI-Powered Form Assistant}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/faculty-feedback-assistant-form-creation.png}
-    \caption{AI Form Creation Assistant -- The intelligent assistant interface that helps faculty members generate feedback forms through natural language prompts, streamlining the form creation process.}
-    \label{fig:ss-assistant-creation}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/faculty-feedback-assistant-form-summary.png}
-    \caption{AI Form Summary View -- The assistant provides a comprehensive summary of the generated form, allowing faculty to review and refine questions before publishing.}
-    \label{fig:ss-assistant-summary}
-\end{figure}
-
-\section*{B.5 Feedback Results and Analytics}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/faculty-feedback-results-page.png}
-    \caption{Feedback Results Dashboard -- Detailed analytics and visualizations of student responses, including response distributions, average ratings, and sentiment analysis of open-ended feedback.}
-    \label{fig:ss-results}
-\end{figure}
-
-\section*{B.6 Student Interface}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-student-dash.png}
-    \caption{Student Dashboard -- The student's personalized view showing pending feedback forms assigned by faculty, completed submissions, and navigation options.}
-    \label{fig:ss-student-dash}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{images/screenshots/ff-student-form.png}
-    \caption{Student Feedback Form -- The clean, accessible interface students use to submit their feedback, featuring clear instructions, progress indicators, and anonymous submission options.}
-    \label{fig:ss-student-form}
+    \includegraphics[width=0.95\textwidth]{images/cns_arch_page.png}
+    \caption{Architecture Page -- Visualizes the encrypted tunnel data plane, showing packet flow between the client TUN interface (\texttt{hyb0}) and gateway TUN interface (\texttt{hyb-gw0}) over UDP, along with the AES-256-GCM datagram frame layout.}
+    \label{fig:ss-architecture}
 \end{figure}

@@ -1,0 +1,85 @@
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Terminology}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Purpose}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Motivation}{2}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Problem Statement}{3}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Objectives}{3}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Scope and Relevance}{4}{section.1.6}%
+\contentsline {chapter}{\numberline {2}Requirement Specification}{6}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Specific Requirements}{6}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Functional Requirements}{6}{subsection.2.1.1}%
+\contentsline {subsubsection}{Hybrid Handshake Module}{6}{subsection.2.1.1}%
+\contentsline {subsubsection}{Tunnel and Encryption Module}{6}{subsection.2.1.1}%
+\contentsline {subsubsection}{Network Interface Module}{7}{subsection.2.1.1}%
+\contentsline {subsubsection}{Desktop Dashboard Module}{7}{subsection.2.1.1}%
+\contentsline {subsubsection}{Observability and Testing Module}{8}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Non-Functional Requirements}{8}{subsection.2.1.2}%
+\contentsline {section}{\numberline {2.2}Hardware Requirements}{9}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Software Requirements}{9}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Development Environment}{9}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Application Stack}{10}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Deployment}{11}{subsection.2.3.3}%
+\contentsline {chapter}{\numberline {3}System Design}{12}{chapter.3}%
+\contentsline {section}{\numberline {3.1}System Architecture}{12}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Client Node}{12}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Gateway Node}{13}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}Hybrid Cryptographic Workflow}{13}{subsection.3.1.3}%
+\contentsline {section}{\numberline {3.2}System Workflow}{14}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Connection Establishment}{14}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Packet Processing}{15}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.3}Technology Stack}{15}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Module Design}{15}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Cryptographic Module}{16}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Tunnel Management Module}{16}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Authentication Module}{16}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Frontend Dashboard Module}{16}{subsection.3.4.4}%
+\contentsline {section}{\numberline {3.5}Security Design Considerations}{16}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Deployment Design}{17}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Virtual Machine Setup}{17}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Docker Deployment}{17}{subsection.3.6.2}%
+\contentsline {chapter}{\numberline {4}Implementation}{18}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Backend Implementation}{18}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Project Structure}{18}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Hybrid Cryptographic Implementation}{18}{subsection.4.1.2}%
+\contentsline {subsubsection}{Classical Cryptography Module}{19}{subsection.4.1.2}%
+\contentsline {subsubsection}{Post-Quantum Cryptography Module}{19}{lstnumber.4.2.4}%
+\contentsline {subsubsection}{Hybrid Key Derivation}{19}{lstnumber.4.3.4}%
+\contentsline {subsection}{\numberline {4.1.3}Handshake Protocol Implementation}{20}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}Encrypted Tunnel Implementation}{20}{subsection.4.1.4}%
+\contentsline {subsubsection}{TUN Device Creation}{20}{subsection.4.1.4}%
+\contentsline {subsubsection}{UDP Packet Encryption}{21}{lstnumber.4.5.3}%
+\contentsline {subsubsection}{Replay Protection}{21}{lstnumber.4.6.5}%
+\contentsline {subsection}{\numberline {4.1.5}API Service Implementation}{21}{subsection.4.1.5}%
+\contentsline {subsection}{\numberline {4.1.6}Containerized Deployment}{22}{subsection.4.1.6}%
+\contentsline {section}{\numberline {4.2}Front End Implementation}{22}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Application Architecture}{22}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Dashboard Features}{23}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}API Connectivity}{23}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Experiment Dashboard (Planned)}{23}{subsection.4.2.4}%
+\contentsline {section}{\numberline {4.3}Security Features}{24}{section.4.3}%
+\contentsline {chapter}{\numberline {5}Testing and Results}{25}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Cryptographic Testing}{25}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Test Cases}{25}{subsection.5.1.1}%
+\contentsline {subsubsection}{Sample Test: Hybrid Handshake Validation}{25}{table.caption.9}%
+\contentsline {section}{\numberline {5.2}Tunnel and Networking Testing}{26}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Test Cases}{26}{subsection.5.2.1}%
+\contentsline {subsubsection}{TUN Interface Testing}{26}{subsection.5.2.1}%
+\contentsline {subsubsection}{UDP Tunnel Testing}{27}{table.caption.10}%
+\contentsline {subsubsection}{Performance Testing}{27}{table.caption.11}%
+\contentsline {section}{\numberline {5.3}Frontend and API Testing}{27}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Test Cases}{27}{subsection.5.3.1}%
+\contentsline {subsubsection}{Dashboard Testing}{27}{subsection.5.3.1}%
+\contentsline {subsubsection}{API Testing}{28}{table.caption.13}%
+\contentsline {section}{\numberline {5.4}System Testing}{28}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}End-to-End Tunnel Establishment}{28}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Cross-Platform Testing}{29}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Security Testing}{29}{subsection.5.4.3}%
+\contentsline {section}{\numberline {5.5}Experimental Results}{29}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Observed Results}{29}{subsection.5.5.1}%
+\contentsline {subsection}{\numberline {5.5.2}Comparison with Classical VPNs}{30}{subsection.5.5.2}%
+\contentsline {section}{\numberline {5.6}Test Summary}{30}{section.5.6}%
+\contentsline {chapter}{\numberline {6}Conclusion}{31}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Conclusion}{31}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Limitations}{32}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Future Enhancements}{32}{section.6.3}%
+\contentsline {chapter}{\numberline {A}Screenshots}{36}{appendix.A}%

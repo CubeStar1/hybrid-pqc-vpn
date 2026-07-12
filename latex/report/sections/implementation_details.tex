@@ -13,20 +13,20 @@ The backend source code is organized into modular components to ensure maintaina
 
 \begin{lstlisting}[language=bash, caption={Backend Project Structure}]
 backend/
-├── hybrid_vpn/
-│   ├── crypto/
-│   │   ├── classical.py
-│   │   ├── hybrid.py
-│   │   └── pqc.py
-│   ├── agent.py
-│   ├── gateway.py
-│   ├── api.py
-│   ├── tunnel.py
-│   ├── config.py
-│   └── schemas.py
-├── tests/
-├── main.py
-└── pyproject.toml
+|-- hybrid_vpn/
+|   |-- crypto/
+|   |   |-- classical.py
+|   |   |-- hybrid.py
+|   |   `-- pqc.py
+|   |-- agent.py
+|   |-- gateway.py
+|   |-- api.py
+|   |-- tunnel.py
+|   |-- config.py
+|   `-- schemas.py
+|-- tests/
+|-- main.py
+`-- pyproject.toml
 \end{lstlisting}
 
 \subsection{Hybrid Cryptographic Implementation}
@@ -206,13 +206,13 @@ The frontend consists of:
 
 \begin{lstlisting}[language=bash, caption={Frontend Project Structure}]
 frontend/
-├── electron/
-│   └── src/
-├── src/
-│   ├── app/
-│   └── components/
-│       └── vpn-dashboard/
-└── package.json
+|-- electron/
+|   `-- src/
+|-- src/
+|   |-- app/
+|   `-- components/
+|       `-- vpn-dashboard/
+`-- package.json
 \end{lstlisting}
 
 \subsection{Dashboard Features}

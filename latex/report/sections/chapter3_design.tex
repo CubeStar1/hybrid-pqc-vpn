@@ -292,30 +292,3 @@ The backend services can also be deployed using Docker containers.
     \end{itemize}
     are required for TUN interface creation inside containers.
 \end{itemize}
-
-\section{Implementation Status}
-
-The project follows a phased implementation model.
-
-\begin{table}[H]
-\centering
-\caption{Implementation Progress}
-\begin{tabular}{|c|p{8cm}|c|}
-\hline
-\textbf{Phase} & \textbf{Description} & \textbf{Status} \\
-\hline
-1 & Hybrid crypto harness with X25519 and ML-KEM-768 & Completed \\
-\hline
-2 & AES-256-GCM encrypted UDP tunnel with replay protection & Completed \\
-\hline
-3 & Linux TUN interface creation and routing & Completed \\
-\hline
-4 & Electron + Next.js dashboard integration & Completed \\
-\hline
-5 & Experiment dashboards and benchmarking & Planned \\
-\hline
-6 & Dual-signature authentication using ML-DSA & Planned \\
-\hline
-\end{tabular}
-\label{tab:implementation-status}
-\end{table}
