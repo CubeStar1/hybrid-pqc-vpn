@@ -1,0 +1,172 @@
+% Chapter 1: Introduction
+% Main chapter title is set in main.tex via \chapter{Introduction}
+
+\section{Terminology}
+
+The following terms and abbreviations are used throughout this report:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Term} & \textbf{Definition} \\ \hline
+
+VPN & Virtual Private Network -- a technology that creates a secure encrypted tunnel over an untrusted network such as the Internet. \\ \hline
+
+PQC & Post-Quantum Cryptography -- cryptographic algorithms designed to remain secure against attacks from quantum computers. \\ \hline
+
+ML-KEM & Module-Lattice Key Encapsulation Mechanism -- the NIST standardized post-quantum key encapsulation mechanism derived from Kyber. \\ \hline
+
+ML-DSA & Module-Lattice Digital Signature Algorithm -- the NIST standardized post-quantum digital signature scheme derived from Dilithium. \\ \hline
+
+ECDH & Elliptic Curve Diffie-Hellman -- a classical cryptographic key exchange mechanism based on elliptic curve cryptography. \\ \hline
+
+X25519 & A high-performance elliptic curve Diffie-Hellman key exchange algorithm widely used in modern secure communication protocols. \\ \hline
+
+HKDF & HMAC-based Key Derivation Function -- a cryptographic key derivation mechanism used to generate secure session keys from shared secrets. \\ \hline
+
+AES-GCM & Advanced Encryption Standard in Galois/Counter Mode -- an authenticated encryption algorithm providing confidentiality and integrity. \\ \hline
+
+TUN/TAP & Virtual network kernel devices used to implement network tunneling and packet forwarding in VPN systems. \\ \hline
+
+API & Application Programming Interface -- a set of rules and protocols allowing software systems to communicate with each other. \\ \hline
+
+FastAPI & A modern Python web framework used for building high-performance APIs and backend services. \\ \hline
+
+GUI & Graphical User Interface -- a visual interface that enables users to interact with software applications. \\ \hline
+
+UDP & User Datagram Protocol -- a lightweight transport layer protocol used for low-latency communication. \\ \hline
+
+HNDL & Harvest Now, Decrypt Later -- a threat model where attackers store encrypted traffic today for future decryption using quantum computers. \\ \hline
+
+\end{tabular}
+\caption{Terminology and Abbreviations}
+\end{table}
+
+\section{Purpose}
+
+The \textbf{Hybrid Post-Quantum VPN} is a research-oriented secure communication system designed to provide quantum-resistant remote access over untrusted networks. The project integrates both classical and post-quantum cryptographic mechanisms into a unified VPN architecture to protect sensitive communications against present-day and future cryptographic threats.
+
+The system combines X25519 elliptic-curve Diffie-Hellman and ML-KEM-768 post-quantum key encapsulation to establish secure hybrid session keys. The platform also provides encrypted UDP tunneling, Linux TUN/TAP-based packet forwarding, replay protection, packet integrity verification, and a modern Electron + Next.js desktop dashboard for tunnel management and monitoring.
+
+The primary goal of the project is to demonstrate a practical migration path toward quantum-safe networking while preserving the performance and interoperability advantages of existing VPN technologies.
+
+\section{Motivation}
+
+Modern VPN protocols such as WireGuard, OpenVPN, and IPsec rely heavily on classical public-key cryptographic algorithms including RSA and Elliptic Curve Cryptography (ECC). Although these systems currently provide strong protection against classical adversaries, they are vulnerable to future quantum attacks based on Shor’s algorithm.
+
+Several challenges in existing VPN systems motivated the development of this project:
+
+\begin{enumerate}
+
+    \item \textbf{Quantum Vulnerability of Classical Cryptography:} Existing VPN handshakes based on RSA and ECC can potentially be broken by sufficiently powerful quantum computers.
+
+    \item \textbf{Harvest Now, Decrypt Later Threat:} Adversaries can capture encrypted VPN traffic today and decrypt it in the future once practical quantum computers become available.
+
+    \item \textbf{Lack of Integrated Post-Quantum Design:} Most existing VPN deployments treat post-quantum cryptography as an optional extension rather than a core design component.
+
+    \item \textbf{Need for Practical Migration Strategies:} Organizations require realistic approaches for transitioning from classical cryptography to quantum-safe systems without abandoning existing infrastructure.
+
+    \item \textbf{Limited Research Prototypes:} There is a lack of accessible research-grade hybrid VPN implementations demonstrating real integration of post-quantum cryptography with encrypted tunneling systems.
+
+\end{enumerate}
+
+These limitations motivated the development of a hybrid VPN prototype that integrates classical and post-quantum cryptographic mechanisms within a unified secure tunneling framework.
+
+\section{Problem Statement}
+
+Current VPN systems rely predominantly on classical public-key cryptographic mechanisms for authentication and key exchange. While secure against classical attackers, these mechanisms are vulnerable to future quantum attacks, creating risks for long-term confidentiality of sensitive communications.
+
+Existing VPN deployments also lack:
+
+\begin{itemize}
+
+    \item Integrated hybrid key exchange combining classical and post-quantum cryptography
+
+    \item Secure migration mechanisms toward quantum-safe communication
+
+    \item Practical implementations demonstrating post-quantum VPN tunneling
+
+    \item Hybrid authentication using both classical and post-quantum signatures
+
+    \item Experimental platforms for evaluating hybrid cryptographic performance and security
+
+\end{itemize}
+
+There is a need for a practical hybrid VPN system capable of establishing secure encrypted tunnels using both classical and post-quantum cryptographic primitives while maintaining usability, interoperability, and acceptable performance.
+
+\section{Objectives}
+
+The objectives of the Hybrid Post-Quantum VPN system are:
+
+\begin{itemize}
+
+    \item To design and implement a hybrid VPN tunnel using both classical and post-quantum cryptographic algorithms.
+
+    \item To implement parallel X25519 and ML-KEM-768 key exchange for hybrid session establishment.
+
+    \item To derive secure session keys using HKDF-SHA256 from combined classical and post-quantum shared secrets.
+
+    \item To secure tunnel traffic using AES-256-GCM authenticated encryption with replay protection and integrity verification.
+
+    \item To implement Linux TUN/TAP-based encrypted packet forwarding between communicating nodes.
+
+    \item To develop a modern Electron + Next.js desktop dashboard for VPN connection management and monitoring.
+
+    \item To evaluate the feasibility and performance impact of hybrid cryptographic VPN migration.
+
+\end{itemize}
+
+\section{Scope and Relevance}
+
+\subsection*{Scope}
+
+This project focuses on developing a research-grade hybrid VPN prototype with the following boundaries:
+
+\begin{itemize}
+
+    \item The system supports secure remote communication between a client node and a gateway node.
+
+    \item The implementation focuses on Linux-based environments using TUN/TAP virtual networking interfaces.
+
+    \item The project integrates X25519, ML-KEM-768, HKDF-SHA256, and AES-256-GCM within a unified hybrid handshake architecture.
+
+    \item The frontend interface is implemented using Electron, Next.js, React, and Tailwind CSS.
+
+    \item The project primarily targets secure tunnel establishment, encrypted UDP transport, and hybrid cryptographic evaluation.
+
+    \item Advanced enterprise VPN features such as multi-hop routing, distributed gateways, and large-scale deployment orchestration are outside the scope of this prototype.
+
+\end{itemize}
+
+\subsection*{Assumptions}
+
+\begin{itemize}
+
+    \item Both communicating nodes operate in Linux environments with TUN/TAP support enabled.
+
+    \item Root or sudo privileges are available for virtual network interface creation and route management.
+
+    \item The participating systems support OpenSSL and liboqs cryptographic libraries.
+
+    \item Both nodes possess routable IP connectivity or share a common network segment for tunnel communication.
+
+\end{itemize}
+
+\subsection*{Relevance}
+
+This project is relevant in the context of emerging quantum threats and the ongoing transition toward quantum-safe communication systems because it:
+
+\begin{itemize}
+
+    \item Demonstrates a practical implementation of hybrid post-quantum VPN architecture.
+
+    \item Provides protection against future quantum-enabled attacks on classical cryptographic systems.
+
+    \item Contributes toward research on quantum-safe secure communication protocols.
+
+    \item Serves as a baseline platform for future integration into WireGuard, TLS, or IPsec-based systems.
+
+    \item Helps evaluate the feasibility, performance, and deployment challenges of post-quantum VPN migration.
+
+\end{itemize}

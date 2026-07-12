@@ -1,0 +1,229 @@
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{times}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{eso-pic}
+\usepackage{transparent}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
+
+\captionsetup[lstlisting]{labelformat=empty}
+
+% --- Code Style Configuration ---
+\lstdefinelanguage{JavaScript}{
+  keywords={async, await, const, let, var, function, return, if, else, for, while, switch, case, break, continue, new, this, try, catch, finally, throw, true, false, null, undefined, import, export, from, default},
+  keywordstyle=\bfseries\color{blue},
+  identifierstyle=\color{black},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{green!60!black}\ttfamily,
+  stringstyle=\color{red},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\bfseries\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black},
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    captionpos=b,
+    numbers=none,
+    xleftmargin=0.5em,
+    xrightmargin=0.5em,
+    aboveskip=1em,
+    belowskip=1em
+}
+
+% --- Page Geometry ---
+\geometry{
+    a4paper,
+    left=1in,
+    right=1in,
+    top=1in,
+    bottom=1in
+}
+
+\onehalfspacing
+
+% --- Header and Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Hybrid Post-Quantum VPN for Secure Remote Access}
+\fancyhead[R]{Cryptography and Network Security}
+\fancyfoot[L]{Dept. of ISE, RVCE}
+\fancyfoot[C]{2025-26}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyhead[L]{Hybrid Post-Quantum VPN for Secure Remote Access}
+    \fancyhead[R]{Cryptography and Network Security}
+    \fancyfoot[L]{Dept. of ISE, RVCE}
+    \fancyfoot[C]{2025-26}
+    \fancyfoot[R]{\thepage}
+    \renewcommand{\headrulewidth}{1pt}
+    \renewcommand{\footrulewidth}{1pt}
+}
+
+% --- Heading Formats ---
+\titleformat{\chapter}[display]
+  {\normalfont\fontsize{18}{22}\bfseries}
+  {}
+  {-20pt}
+  {\centering\MakeUppercase}
+
+\titlespacing*{\chapter}{0pt}{-30pt}{15pt}
+
+\titleformat{\section}
+  {\normalfont\fontsize{16}{19}\bfseries}{\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\fontsize{14}{17}\bfseries}{\thesubsection}{1em}{}
+
+\renewcommand{\normalsize}{\fontsize{12}{14}\selectfont}
+
+% --- Title Page ---
+\renewcommand{\maketitle}{
+    \begin{titlepage}
+        \centering
+
+        {\Large\bfseries RV COLLEGE OF ENGINEERING \textsuperscript{\textregistered}\par}
+        \vspace{0.1cm}
+        {\large\bfseries BENGALURU-560059\par}
+        \vspace{0.1cm}
+        (Autonomous Institution Affiliated to VTU, Belagavi)\par
+        \vspace{0.6cm}
+
+        \includegraphics[width=0.35\textwidth]{image.png}\par
+        \vspace{0.8cm}
+
+        {\Large Hybrid Post-Quantum VPN for Secure Remote Access\par}
+        \vspace{0.3cm}
+        {\large\bfseries Report\par}
+        \vspace{0.2cm}
+        {\large\bfseries Cryptography and Network Security\par}
+        \vspace{0.1cm}
+        {\bfseries (CD252IA)\par}
+        \vspace{0.6cm}
+
+        {\itshape Submitted By\par}
+        \vspace{0.4cm}
+
+        Avinash Anish (1RV23IS145)\par
+        \vspace{0.2cm}
+        Mohammed Huzaif S (1RV23IS073)\par
+
+        \vspace{1cm}
+
+        {\large\bfseries Under the Guidance of\par}
+        \vspace{0.3cm}
+
+        {\bfseries Padmashree T\par}
+        \vspace{0.1cm}
+        Associate Professor\par
+
+        \vspace{1.5cm}
+
+        {\itshape in partial fulfillment for the award of degree of\par}
+        \vspace{0.2cm}
+
+        {\large\bfseries\itshape Bachelor of Engineering\par}
+        \vspace{0.1cm}
+
+        {\itshape in\par}
+        \vspace{0.1cm}
+
+        {\large\bfseries INFORMATION SCIENCE AND ENGINEERING\par}
+        \vspace{0.3cm}
+
+        {\bfseries 2025-26\par}
+
+    \end{titlepage}
+}
+
+% -------------------------------------------------
+% DOCUMENT START
+% -------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+% Preliminary Pages
+\pagestyle{empty}
+\pagenumbering{gobble}
+
+\newpage
+\input{sections/certificate}
+
+\newpage
+\input{sections/declaration}
+
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+
+% Main Content
+\newpage
+\pagenumbering{arabic}
+\pagestyle{fancy}
+
+% -------------------------------------------------
+% CHAPTERS
+% -------------------------------------------------
+
+\chapter{Introduction}
+\input{sections/chapter1_introduction.tex}
+
+\chapter{Requirement Specification}
+\input{sections/chapter2_requirements.tex}
+
+\chapter{System Design}
+\input{sections/chapter3_design.tex}
+
+\chapter{Implementation}
+\input{sections/implementation_details.tex}
+
+\chapter{Testing and Results}
+\input{sections/chapter5_testing.tex}
+
+\chapter{Conclusion}
+\input{sections/chapter6_conclusion.tex}
+
+% -------------------------------------------------
+% REFERENCES
+% -------------------------------------------------
+
+\newpage
+\input{sections/references.tex}
+
+% -------------------------------------------------
+% APPENDICES
+% -------------------------------------------------
+
+\appendix
+
+\chapter{Screenshots}
+\input{sections/appendix_b_screenshots.tex}
+
+\end{document}

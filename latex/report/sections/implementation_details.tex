@@ -1,0 +1,286 @@
+% Chapter 4: Implementation Details
+\section{Backend Implementation}
+\label{sec:backend_implementation}
+
+This section describes the implementation of the backend system for the proposed Hybrid Post-Quantum VPN. The backend is developed in Python using FastAPI and serves as the core engine responsible for hybrid cryptographic handshakes, encrypted tunnel management, Linux TUN interface orchestration, and secure communication between the client and gateway nodes.
+
+The backend architecture follows a modular service-oriented design consisting of cryptographic modules, API services, and tunnel management components.
+
+\subsection{Project Structure}
+\label{subsec:project_structure}
+
+The backend source code is organized into modular components to ensure maintainability and extensibility.
+
+\begin{lstlisting}[language=bash, caption={Backend Project Structure}]
+backend/
+├── hybrid_vpn/
+│   ├── crypto/
+│   │   ├── classical.py
+│   │   ├── hybrid.py
+│   │   └── pqc.py
+│   ├── agent.py
+│   ├── gateway.py
+│   ├── api.py
+│   ├── tunnel.py
+│   ├── config.py
+│   └── schemas.py
+├── tests/
+├── main.py
+└── pyproject.toml
+\end{lstlisting}
+
+\subsection{Hybrid Cryptographic Implementation}
+\label{subsec:crypto_implementation}
+
+The cryptographic subsystem implements hybrid key establishment by combining classical and post-quantum primitives.
+
+\subsubsection{Classical Cryptography Module}
+
+The classical cryptographic layer uses OpenSSL through Python bindings for secure and efficient execution.
+
+\begin{itemize}
+    \item \textbf{X25519:} Used for elliptic-curve Diffie-Hellman key exchange.
+    \item \textbf{ECDSA-P256:} Used for server authentication and handshake signing.
+    \item \textbf{AES-256-GCM:} Used for authenticated tunnel encryption.
+    \item \textbf{HKDF-SHA256:} Used for transcript-bound key derivation.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Classical Key Exchange Initialization}]
+private_key = x25519.X25519PrivateKey.generate()
+public_key = private_key.public_key()
+
+shared_secret = private_key.exchange(peer_public_key)
+\end{lstlisting}
+
+\subsubsection{Post-Quantum Cryptography Module}
+
+The post-quantum subsystem uses \texttt{liboqs} through \texttt{pyoqs} bindings.
+
+\begin{itemize}
+    \item \textbf{ML-KEM-768:} Post-quantum key encapsulation mechanism.
+    \item \textbf{ML-DSA-65:} Planned post-quantum digital signature support.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={ML-KEM-768 Key Encapsulation}]
+kem = oqs.KeyEncapsulation("ML-KEM-768")
+
+public_key = kem.generate_keypair()
+ciphertext, pq_secret = kem.encap_secret(public_key)
+\end{lstlisting}
+
+\subsubsection{Hybrid Key Derivation}
+
+Both shared secrets are concatenated and processed through HKDF-SHA256.
+
+\begin{equation}
+K_{session} = HKDF(S_{ML-KEM} \parallel S_{X25519},\ TranscriptHash)
+\end{equation}
+
+This ensures that session security depends on both cryptographic primitives.
+
+\begin{lstlisting}[language=Python, caption={Hybrid Session Key Derivation}]
+combined_secret = pq_secret + classical_secret
+
+session_key = HKDF(
+    algorithm=hashes.SHA256(),
+    length=32,
+    salt=transcript_hash,
+    info=b"hybrid-vpn"
+).derive(combined_secret)
+\end{lstlisting}
+
+\subsection{Handshake Protocol Implementation}
+\label{subsec:handshake_protocol}
+
+The system performs a real client-server hybrid handshake over HTTP before establishing the encrypted tunnel.
+
+\begin{enumerate}
+    \item Client sends supported algorithm suite.
+    \item Gateway returns selected suite and authentication data.
+    \item X25519 ephemeral key exchange is performed.
+    \item ML-KEM-768 encapsulation and decapsulation are executed.
+    \item Handshake transcript is hashed.
+    \item HKDF derives final symmetric session keys.
+    \item Tunnel parameters are provisioned.
+\end{enumerate}
+
+
+
+\subsection{Encrypted Tunnel Implementation}
+\label{subsec:tunnel_implementation}
+
+The tunnel module establishes secure packet forwarding between Linux TUN interfaces and encrypted UDP sockets.
+
+\subsubsection{TUN Device Creation}
+
+Linux TUN devices are created dynamically using \texttt{pyroute2}.
+
+\begin{lstlisting}[language=Python, caption={TUN Interface Creation}]
+ip.link("add", ifname="hyb0", kind="tuntap", mode="tun")
+ip.addr("add", index=idx, address="10.42.0.2", prefixlen=24)
+ip.link("set", index=idx, state="up")
+\end{lstlisting}
+
+Generated interfaces:
+
+\begin{itemize}
+    \item Client: \texttt{hyb0 (10.42.0.2/24)}
+    \item Gateway: \texttt{hyb-gw0 (10.42.0.1/24)}
+\end{itemize}
+
+\subsubsection{UDP Packet Encryption}
+
+Tunnel traffic is encrypted using AES-256-GCM.
+
+\begin{lstlisting}[language=Python, caption={Packet Encryption}]
+ciphertext = aesgcm.encrypt(
+    nonce,
+    plaintext_packet,
+    associated_data
+)
+\end{lstlisting}
+
+Each packet contains:
+
+\begin{itemize}
+    \item Sequence-number-derived nonce
+    \item AES-GCM ciphertext
+    \item Authentication tag
+\end{itemize}
+
+\subsubsection{Replay Protection}
+
+Sequence numbers are validated to prevent replay attacks. Duplicate or out-of-window packets are dropped immediately.
+
+\subsection{API Service Implementation}
+\label{subsec:api_services}
+
+FastAPI exposes REST APIs for tunnel management.
+
+\begin{lstlisting}[language=Python, caption={FastAPI Endpoints}]
+POST /connect
+POST /disconnect
+POST /demo/handshake
+GET  /status
+GET  /health
+GET  /metrics
+\end{lstlisting}
+
+These endpoints allow secure interaction between the frontend dashboard and backend services.
+
+\subsection{Containerized Deployment}
+\label{subsec:docker_deployment}
+
+Docker support enables reproducible deployment across Linux systems.
+
+\begin{lstlisting}[language=bash, caption={Backend Docker Build}]
+docker build -t hybrid-vpn-backend .
+\end{lstlisting}
+
+For full tunnel functionality:
+
+\begin{lstlisting}[language=bash, caption={Docker Run with TUN Access}]
+docker run --rm \
+  --cap-add=NET_ADMIN \
+  --device /dev/net/tun \
+  -p 8765:8765 \
+  -p 4434:4434/udp \
+  hybrid-vpn-backend
+\end{lstlisting}
+
+\section{Front End Implementation}
+\label{sec:frontend_implementation}
+
+The frontend provides a desktop dashboard for managing VPN connections and monitoring tunnel state. It is built using Next.js, React, TypeScript, Tailwind CSS, and Electron.
+
+\subsection{Application Architecture}
+\label{subsec:frontend_architecture}
+
+The frontend consists of:
+
+\begin{itemize}
+    \item \textbf{Electron Shell:} Desktop runtime environment.
+    \item \textbf{Next.js UI:} Interactive dashboard.
+    \item \textbf{Axios Client:} Communication with backend APIs.
+\end{itemize}
+
+\begin{lstlisting}[language=bash, caption={Frontend Project Structure}]
+frontend/
+├── electron/
+│   └── src/
+├── src/
+│   ├── app/
+│   └── components/
+│       └── vpn-dashboard/
+└── package.json
+\end{lstlisting}
+
+\subsection{Dashboard Features}
+\label{subsec:dashboard_features}
+
+The dashboard provides operational visibility and user control.
+
+\begin{itemize}
+    \item Connect to VPN gateway
+    \item Disconnect active tunnel
+    \item Display active algorithm suite
+    \item Show tunnel status
+    \item Monitor byte counters
+    \item View handshake latency
+    \item Display rekey countdown
+    \item Observe nonce progression
+\end{itemize}
+
+
+
+\subsection{API Connectivity}
+\label{subsec:frontend_connectivity}
+
+Frontend communication uses Axios-based API requests.
+
+\begin{lstlisting}[language=JavaScript, caption={Connect API Request}]
+await axios.post("/connect", {
+  profile_id: "lab-gateway",
+  username: "demo",
+  password: "demo-vpn-2026"
+});
+\end{lstlisting}
+
+The frontend continuously polls status endpoints for real-time updates.
+
+\subsection{Experiment Dashboard (Planned)}
+\label{subsec:experiment_dashboard}
+
+Future frontend enhancements will include performance visualization modules such as:
+
+\begin{itemize}
+    \item Classical vs hybrid handshake latency comparison
+    \item Tunnel throughput graphs
+    \item Packet drop statistics
+    \item CPU and memory utilization
+\end{itemize}
+
+\section{Security Features}
+\label{sec:security_features}
+
+The implementation incorporates multiple security mechanisms.
+
+\begin{enumerate}
+    \item \textbf{Hybrid Cryptography:} Combines classical and post-quantum key exchange.
+    
+    \item \textbf{Forward Secrecy:} Ephemeral X25519 keys prevent retrospective decryption.
+    
+    \item \textbf{Transcript Binding:} HKDF uses transcript hash to resist downgrade attacks.
+    
+    \item \textbf{Authenticated Encryption:} AES-256-GCM provides confidentiality and integrity.
+    
+    \item \textbf{Replay Protection:} Sequence number validation prevents packet reuse.
+    
+    \item \textbf{Nonce Safety:} Nonces never repeat within a session.
+    
+    \item \textbf{Secure Key Handling:} Session secrets remain only in process memory.
+    
+    \item \textbf{Root Privilege Isolation:} Elevated privileges are used only for TUN operations.
+    
+    \item \textbf{Containerized Isolation:} Docker deployment improves reproducibility and system separation.
+\end{enumerate}

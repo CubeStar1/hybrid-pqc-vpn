@@ -14,7 +14,7 @@ export function AppShell({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className="min-h-auto bg-background">
-        <header className="sticky top-0 z-20 border-b border-border/60 bg-background/85 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-border/60 bg-background/85 backdrop-blur rounded-2xl">
           <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
             <div className="flex min-w-0 items-center gap-3">
               <SidebarTrigger />

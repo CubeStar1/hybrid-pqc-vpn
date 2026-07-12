@@ -1,0 +1,13 @@
+\begin{abstract}
+
+The rapid advancement of quantum computing poses a significant threat to traditional public-key cryptographic systems used in modern Virtual Private Networks (VPNs). Conventional VPN protocols primarily rely on elliptic-curve and RSA-based cryptography, which are vulnerable to future quantum attacks such as Shor’s algorithm. This project presents the design and implementation of a Hybrid Post-Quantum VPN prototype that combines classical and post-quantum cryptographic mechanisms to provide secure remote communication resistant to both present-day and future adversaries.
+
+The proposed system implements a hybrid key exchange mechanism using X25519 elliptic-curve Diffie–Hellman and ML-KEM-768 post-quantum key encapsulation. The derived shared secrets are combined using HKDF-SHA256 to generate secure session keys for encrypted communication. Tunnel traffic is protected using AES-256-GCM encryption with replay protection and packet integrity verification. The system is implemented using a Python-based backend with FastAPI, Linux TUN/TAP networking, encrypted UDP transport, and an Electron + Next.js graphical dashboard for tunnel management and monitoring.
+
+Experimental evaluation demonstrates that the hybrid VPN successfully establishes secure encrypted tunnels while maintaining practical performance for remote access and secure file transfer scenarios. The implementation shows that hybrid cryptographic migration can be achieved with moderate overhead while significantly improving long-term confidentiality against “harvest now, decrypt later” attacks.
+
+The project concludes that hybrid cryptographic VPN architectures provide a practical transition path toward quantum-safe networking without abandoning existing trusted classical cryptographic systems.
+
+\textbf{Keywords:} Hybrid VPN, Post-Quantum Cryptography, ML-KEM-768, X25519, AES-256-GCM, Quantum-Safe Networking
+
+\end{abstract}

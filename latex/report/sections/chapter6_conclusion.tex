@@ -1,0 +1,99 @@
+% Chapter 6: Conclusion
+
+\section{Conclusion}
+
+The Hybrid Post-Quantum VPN system was successfully designed and implemented to provide secure communication resistant to both classical and quantum-era attacks. The project integrates modern cryptographic techniques with efficient networking mechanisms to create a secure, scalable, and future-ready VPN architecture.
+
+The system addresses the growing security concerns associated with quantum computing by combining classical cryptography with post-quantum cryptographic algorithms. Through the integration of hybrid key exchange, authenticated communication, encrypted tunneling, and secure client-server architecture, the proposed system demonstrates the feasibility of deploying post-quantum secure VPN infrastructures in real-world environments.
+
+The major achievements of the project include:
+
+\begin{itemize}
+
+    \item \textbf{Hybrid Post-Quantum Key Exchange:}
+    The VPN implements a hybrid key exchange mechanism combining X25519 elliptic curve cryptography with ML-KEM-768 (Kyber), ensuring protection against both classical and quantum adversaries.
+
+    \item \textbf{Secure Tunnel Encryption:}
+    AES-256-GCM encryption is used for secure tunnel communication, providing confidentiality, integrity, and authenticated encryption for transmitted packets.
+
+    \item \textbf{Post-Quantum Authentication:}
+    The system integrates ECDSA-P256 and ML-DSA based authentication mechanisms to verify client and server identities securely.
+
+    \item \textbf{TUN/TAP Based VPN Architecture:}
+    Linux TUN/TAP virtual network interfaces were successfully utilized to create encrypted VPN tunnels capable of securely forwarding IP packets between peers.
+
+    \item \textbf{Cross-Platform User Interface:}
+    A modern desktop interface was developed using Next.js and Electron, enabling users to configure VPN connections, monitor status, and manage secure sessions easily.
+
+    \item \textbf{Scalable Backend Infrastructure:}
+    The backend was implemented using FastAPI and Dockerized deployment, allowing modularity, scalability, and simplified deployment across virtualized environments.
+
+    \item \textbf{Integration of Post-Quantum Libraries:}
+    The project successfully integrated OpenSSL and liboqs libraries for performing post-quantum cryptographic operations within the VPN workflow.
+
+    \item \textbf{Secure Communication Workflow:}
+    The system establishes authenticated secure sessions, derives shared symmetric keys, encrypts tunnel traffic, and ensures secure packet transmission between connected peers.
+
+\end{itemize}
+
+The implementation demonstrates that hybrid post-quantum VPN systems can be practically deployed using existing networking infrastructure while significantly improving long-term cryptographic security.
+
+\section{Limitations}
+
+Although the proposed system achieves its primary objectives, certain limitations remain:
+
+\begin{itemize}
+
+    \item \textbf{Performance Overhead:}
+    Post-quantum cryptographic algorithms introduce larger key sizes and increased computational overhead compared to traditional VPN systems.
+
+    \item \textbf{Platform Dependency:}
+    The current implementation is primarily optimized for Linux environments due to the usage of TUN/TAP virtual interfaces.
+
+    \item \textbf{Limited Scalability Testing:}
+    The system has been tested primarily in controlled VM-based environments and has not yet undergone large-scale production deployment testing.
+
+    \item \textbf{Lack of Mobile Client Support:}
+    Dedicated Android and iOS VPN clients are not currently implemented.
+
+    \item \textbf{Experimental PQC Standards:}
+    Since post-quantum cryptography standards are still evolving, future algorithmic updates may require modifications to the implementation.
+
+    \item \textbf{Resource Consumption:}
+    Hybrid cryptographic operations consume more CPU and memory resources compared to conventional VPN protocols.
+
+\end{itemize}
+
+\section{Future Enhancements}
+
+Several improvements and extensions can be incorporated into the system in future work:
+
+\begin{itemize}
+
+    \item \textbf{WireGuard Integration:}
+    Integrating post-quantum cryptographic primitives directly into WireGuard could improve performance and usability.
+
+    \item \textbf{Cross-Platform Support:}
+    Extending support to Windows, Android, and iOS platforms would increase accessibility and usability.
+
+    \item \textbf{Hardware Acceleration:}
+    Utilizing hardware-based cryptographic acceleration can reduce latency and improve VPN throughput.
+
+    \item \textbf{Automated Key Rotation:}
+    Implementing periodic automated re-keying mechanisms would further enhance long-term communication security.
+
+    \item \textbf{Multi-Hop VPN Routing:}
+    Future versions may support multi-hop encrypted routing for enhanced anonymity and traffic obfuscation.
+
+    \item \textbf{Performance Optimization:}
+    Optimizing cryptographic computations and packet handling can reduce overhead introduced by hybrid PQC operations.
+
+    \item \textbf{Integration with Cloud Infrastructure:}
+    Deploying the VPN system on cloud-native infrastructure would improve scalability and high availability.
+
+    \item \textbf{Advanced Monitoring and Analytics:}
+    Adding real-time monitoring dashboards and traffic analytics would improve system administration and debugging capabilities.
+
+\end{itemize}
+
+In conclusion, the Hybrid Post-Quantum VPN project demonstrates a practical and forward-looking approach toward securing communication systems against future quantum threats. By integrating classical and post-quantum cryptographic mechanisms within a modern VPN architecture, the system provides a strong foundation for the development of next-generation secure networking solutions.

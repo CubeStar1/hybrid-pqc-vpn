@@ -1,0 +1,111 @@
+% Appendix A: Source Code and Setup
+
+\section{Source Code Repository}
+
+The complete source code for the Faculty Feedback Management System is available on GitHub:
+
+\begin{center}
+\url{https://github.com/Huzaif2309/faculty-feedback-system}
+\end{center}
+
+The repository contains the full implementation including the frontend application, backend API, and database schema.
+
+\section{Frontend Setup}
+
+\subsection{Prerequisites}
+
+\begin{itemize}
+    \item Node.js (v18 or higher)
+    \item Supabase Account (\url{https://supabase.com})
+    \item Google Cloud Console Project for OAuth and AI features
+    \item Resend Account for email functionality (\url{https://resend.com})
+\end{itemize}
+
+\subsection{Installation}
+
+\begin{lstlisting}[language=bash, caption={Clone and Install Frontend}]
+git clone https://github.com/Huzaif2309/faculty-feedback-system
+cd faculty-feedback-system/frontend
+npm install
+\end{lstlisting}
+
+\subsection{Environment Configuration}
+
+\begin{lstlisting}[language=bash, caption={Configure Environment Variables}]
+cp env.example .env
+\end{lstlisting}
+
+Required environment variables in \texttt{.env}:
+\begin{itemize}
+    \item \texttt{NEXT\_PUBLIC\_SUPABASE\_URL} - Supabase project URL
+    \item \texttt{NEXT\_PUBLIC\_SUPABASE\_ANON\_KEY} - Supabase anonymous key
+    \item \texttt{RESEND\_API\_KEY} - Resend API key for emails
+    \item \texttt{GOOGLE\_GENERATIVE\_AI\_API\_KEY} - Google AI API key
+    \item \texttt{NEXT\_PUBLIC\_VAPID\_PUBLIC\_KEY} - VAPID public key
+    \item \texttt{VAPID\_PRIVATE\_KEY} - VAPID private key
+\end{itemize}
+
+Generate VAPID keys for push notifications:
+
+\begin{lstlisting}[language=bash, caption={Generate VAPID Keys}]
+npx web-push generate-vapid-keys
+\end{lstlisting}
+
+\subsection{Database Setup}
+
+Initialize the Supabase database by running the SQL schema in the Supabase Dashboard SQL Editor:
+
+\begin{lstlisting}[language=bash, caption={Database Schema Location}]
+frontend/lib/supabase/migrations/schema.sql
+\end{lstlisting}
+
+\subsection{Run the Application}
+
+\begin{lstlisting}[language=bash, caption={Start Frontend Development Server}]
+npm run dev
+# Application available at http://localhost:3000
+\end{lstlisting}
+
+\section{Backend Setup}
+
+The backend is a Flask API that provides additional REST endpoints for data management.
+
+\subsection{Prerequisites}
+
+\begin{itemize}
+    \item Python 3.10 or higher
+    \item pip package manager
+\end{itemize}
+
+\subsection{Installation}
+
+\begin{lstlisting}[language=bash, caption={Install Backend Dependencies}]
+cd faculty-feedback-system/faculty-feedback-backend
+pip install -r requirements.txt
+\end{lstlisting}
+
+\subsection{Environment Configuration}
+
+Create a \texttt{.env} file with the following variables:
+
+\begin{itemize}
+    \item \texttt{SUPABASE\_URL} - Supabase project URL
+    \item \texttt{SUPABASE\_KEY} - Supabase service role key
+\end{itemize}
+
+\subsection{Run the Backend}
+
+\begin{lstlisting}[language=bash, caption={Start Backend Server}]
+python app.py
+# API available at http://localhost:5000
+\end{lstlisting}
+
+\section{Docker Deployment}
+
+Both frontend and backend can be deployed using Docker:
+
+\begin{lstlisting}[language=bash, caption={Docker Deployment}]
+docker-compose up --build
+\end{lstlisting}
+
+

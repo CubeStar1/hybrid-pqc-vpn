@@ -1,0 +1,254 @@
+% Chapter 2: Requirement Specification
+% Main chapter title is set in main.tex via \chapter{Requirement Specification}
+
+\section{Specific Requirements}
+
+This section describes the functional and non-functional requirements of the Hybrid Post-Quantum VPN system. These requirements define the operational capabilities, security properties, performance expectations, and deployment constraints of the proposed hybrid VPN architecture.
+
+\subsection{Functional Requirements}
+
+Functional requirements describe the specific operations and services that the system must perform.
+
+\subsubsection{Hybrid Handshake Module}
+
+The hybrid handshake module is responsible for establishing secure session keys using both classical and post-quantum cryptographic primitives.
+
+\begin{itemize}
+
+    \item The system shall perform X25519 elliptic-curve Diffie-Hellman key exchange during every tunnel handshake.
+
+    \item The system shall perform ML-KEM-768 post-quantum key encapsulation in parallel with the classical key exchange.
+
+    \item The system shall combine the X25519 and ML-KEM-768 shared secrets using HKDF-SHA256 to derive final session keys.
+
+    \item The system shall bind derived session keys to the handshake transcript to prevent downgrade attacks and transcript tampering.
+
+    \item The system shall support secure algorithm negotiation between communicating peers.
+
+    \item The system shall authenticate peers using ECDSA-P256 signatures over the handshake transcript.
+
+    \item The system shall support future integration of ML-DSA hybrid post-quantum signatures.
+
+\end{itemize}
+
+\subsubsection{Tunnel and Encryption Module}
+
+The tunnel module is responsible for encrypted communication and secure packet forwarding.
+
+\begin{itemize}
+
+    \item The system shall encrypt all tunnel traffic using AES-256-GCM authenticated encryption.
+
+    \item The system shall include a unique nonce and authentication tag for every encrypted packet.
+
+    \item The system shall implement replay protection using packet sequence numbers and nonce verification.
+
+    \item The system shall drop and log packets that fail integrity verification.
+
+    \item The system shall securely forward IPv4 packets between Linux TUN interfaces and encrypted UDP sockets.
+
+    \item The system shall support bidirectional encrypted communication between client and gateway nodes.
+
+    \item The system shall trigger rekeying upon nonce exhaustion or prolonged tunnel usage.
+
+\end{itemize}
+
+\subsubsection{Network Interface Module}
+
+The network interface module handles virtual networking and routing operations.
+
+\begin{itemize}
+
+    \item The system shall create Linux TUN interfaces dynamically upon successful tunnel establishment.
+
+    \item The system shall configure IP addresses and routing rules using \texttt{pyroute2}.
+
+    \item The system shall support encrypted UDP transport over configurable ports.
+
+    \item The system shall cleanly tear down TUN interfaces and routes after tunnel termination.
+
+    \item The system shall support communication between virtual machines connected through bridged or NAT networking.
+
+\end{itemize}
+
+\subsubsection{Desktop Dashboard Module}
+
+The desktop dashboard provides monitoring and control capabilities for the VPN tunnel.
+
+\begin{itemize}
+
+    \item The system shall provide an Electron + Next.js desktop dashboard for tunnel management.
+
+    \item The dashboard shall allow users to initiate and terminate VPN connections.
+
+    \item The dashboard shall display real-time tunnel status including connection state, active algorithms, throughput, and session details.
+
+    \item The dashboard shall display handshake logs and tunnel events.
+
+    \item The system shall expose REST APIs for frontend-backend communication using FastAPI.
+
+    \item The frontend shall support browser-only development mode for testing purposes.
+
+\end{itemize}
+
+\subsubsection{Observability and Testing Module}
+
+The observability module provides monitoring, logging, and experimental evaluation capabilities.
+
+\begin{itemize}
+
+    \item The system shall maintain timestamped logs of handshake and tunnel events.
+
+    \item The system shall expose health-check and status APIs for monitoring.
+
+    \item The system shall provide metrics for handshake latency, throughput, packet counts, and replay detection.
+
+    \item The system shall support experimental comparison between classical-only and hybrid handshakes.
+
+    \item The system shall provide automated unit testing using \texttt{pytest}.
+
+\end{itemize}
+
+\subsection{Non-Functional Requirements}
+
+Non-functional requirements define the quality attributes and operational constraints of the system.
+
+\begin{itemize}
+
+    \item \textbf{Performance:} The hybrid handshake shall introduce minimal latency overhead compared to classical-only VPN handshakes. The encrypted tunnel shall sustain practical throughput for secure remote communication and file transfer.
+
+    \item \textbf{Security:} The system shall provide confidentiality, integrity, replay protection, and forward secrecy. Session keys shall depend on both classical and post-quantum cryptographic mechanisms.
+
+    \item \textbf{Reliability:} The system shall detect tunnel disconnections and malformed packets gracefully without crashing or entering undefined states.
+
+    \item \textbf{Usability:} The Electron + Next.js dashboard shall provide an intuitive user interface for tunnel monitoring and management.
+
+    \item \textbf{Maintainability:} Cryptographic primitives shall be modular and abstracted to support future replacement or extension with alternative post-quantum algorithms.
+
+    \item \textbf{Scalability:} The architecture shall support future extension toward enterprise-scale VPN deployments and additional cryptographic suites.
+
+    \item \textbf{Deployability:} The system shall support deployment using Docker containers and Linux virtual machines.
+
+\end{itemize}
+
+\section{Hardware Requirements}
+
+The Hybrid Post-Quantum VPN system requires Linux-compatible hardware capable of supporting encrypted tunneling, virtual networking, and post-quantum cryptographic operations.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{8cm}|}
+\hline
+\textbf{Component} & \textbf{Specification} \\ \hline
+
+Processor & Quad-core x86\_64 CPU with AES-NI support (8-core with AVX2 recommended) \\ \hline
+
+RAM & 8 GB DDR4 minimum (16 GB recommended) \\ \hline
+
+Storage & 40 GB SSD minimum (100 GB NVMe SSD recommended) \\ \hline
+
+Network Interface & 1 Gbps Ethernet connection (wired preferred for latency testing) \\ \hline
+
+Operating System & Ubuntu 22.04/24.04 LTS with Linux kernel version 5.15 or higher \\ \hline
+
+Kernel Support & Linux TUN/TAP driver enabled using \texttt{modprobe tun} \\ \hline
+
+\end{tabular}
+\caption{Hardware Requirements}
+\end{table}
+
+\section{Software Requirements}
+
+The system uses modern networking, cryptographic, backend, and frontend technologies to implement a research-grade hybrid VPN prototype.
+
+\subsection{Development Environment}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Category} & \textbf{Technology} & \textbf{Version} \\ \hline
+
+Operating System & Ubuntu Linux & 22.04/24.04 LTS \\ \hline
+
+Programming Language & Python & 3.11 or higher \\ \hline
+
+Frontend Runtime & Node.js & 20 LTS or higher \\ \hline
+
+Package Manager & pnpm / uv & Latest \\ \hline
+
+Version Control & Git & 2.40 or higher \\ \hline
+
+IDE & Visual Studio Code & Latest \\ \hline
+
+\end{tabular}
+\caption{Development Environment}
+\end{table}
+
+\subsection{Application Stack}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|p{4cm}|}
+\hline
+\textbf{Layer} & \textbf{Technology} & \textbf{Version} & \textbf{Purpose} \\ \hline
+
+Frontend Framework & Next.js & 14+ & Desktop dashboard and UI \\ \hline
+
+Desktop Runtime & Electron & Latest & Cross-platform desktop application \\ \hline
+
+Frontend Library & React & Latest & User interface rendering \\ \hline
+
+Styling & Tailwind CSS & 3.4+ & Responsive UI styling \\ \hline
+
+Frontend Language & TypeScript & 5+ & Type-safe frontend development \\ \hline
+
+Backend Framework & FastAPI & 0.110+ & REST API services \\ \hline
+
+Backend Runtime & Python & 3.11+ & Backend implementation \\ \hline
+
+Async Runtime & AsyncIO & Built-in & Concurrent networking operations \\ \hline
+
+Cryptographic Library & OpenSSL & 3.0+ & X25519, AES-GCM, HKDF, ECDSA \\ \hline
+
+Post-Quantum Library & liboqs & 0.10+ & ML-KEM-768 and ML-DSA \\ \hline
+
+Python Bindings & pyoqs & 0.10+ & Python interface for liboqs \\ \hline
+
+Networking & pyroute2 & Latest & Linux TUN/TAP and route management \\ \hline
+
+Transport Protocol & UDP Sockets & Native & Encrypted tunnel transport \\ \hline
+
+Testing Framework & pytest & 8+ & Automated backend testing \\ \hline
+
+Containerization & Docker & Latest & Deployment and testing \\ \hline
+
+\end{tabular}
+\caption{Application Stack}
+\end{table}
+
+\subsection{Deployment}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{5cm}|}
+\hline
+\textbf{Component} & \textbf{Technology} & \textbf{Purpose} \\ \hline
+
+Backend Deployment & Docker & Containerized backend deployment \\ \hline
+
+Frontend Deployment & Electron Desktop App & Desktop-based VPN controller \\ \hline
+
+Networking Environment & Linux Virtual Machines & Tunnel and routing evaluation \\ \hline
+
+Hypervisor & VMware Workstation / VirtualBox & VM-based testing \\ \hline
+
+Monitoring Tools & Wireshark / tcpdump & Packet inspection and debugging \\ \hline
+
+API Hosting & FastAPI + Uvicorn & Backend API services \\ \hline
+
+Transport Layer & UDP over IPv4 & Encrypted tunnel communication \\ \hline
+
+\end{tabular}
+\caption{Deployment Stack}
+\end{table}
